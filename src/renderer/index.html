@@ -27,7 +27,23 @@
 
       <div class="rail-spacer"></div>
 
-      <!-- Quick Action Tools -->
+      <!-- V2 Signature Tools -->
+      <button id="btn-ai-assistant" class="rail-btn" title="AI Research Assistant (Ctrl+Shift+A)">
+        <span>🤖</span>
+      </button>
+      <button id="btn-library" class="rail-btn" title="Smart Library & Notes (Ctrl+Shift+L)">
+        <span>📚</span>
+      </button>
+      <button id="btn-automations" class="rail-btn" title="Browser Automations (Ctrl+Shift+U)">
+        <span>⚡</span>
+      </button>
+      <button id="btn-focus" class="rail-btn" title="Focus Sessions & Pomodoro">
+        <span>⏱️</span>
+      </button>
+
+      <div class="rail-divider"></div>
+
+      <!-- Window / View Tools -->
       <button id="btn-toggle-split" class="rail-btn" title="Toggle Split View (Ctrl+\)">
         <span>🔲</span>
       </button>
@@ -61,6 +77,17 @@
           <button id="btn-new-tab" class="tab-btn-add" title="New Tab (Ctrl+T)">+</button>
         </div>
 
+        <!-- Focus Timer Indicator Pill -->
+        <div id="focus-pill" class="focus-pill" style="display: none;" title="Active Focus Session">
+          <span class="focus-dot"></span>
+          <span id="focus-time-label">25:00</span>
+        </div>
+
+        <!-- Automation Notification Toast -->
+        <div id="automation-toast" class="automation-toast" style="display: none;">
+          <span id="automation-toast-text"></span>
+        </div>
+
         <!-- Window Minimize, Maximize, Close Buttons -->
         <div class="window-controls">
           <button id="win-min" class="win-btn" title="Minimize">−</button>
@@ -81,6 +108,7 @@
         <div class="url-input-container">
           <span class="url-lock-icon">🔒</span>
           <input type="text" id="url-input" placeholder="Search with Google or enter address..." spellcheck="false" autocomplete="off">
+          <button id="btn-save-library" class="omnibox-action-btn" title="Save page to Smart Library">🔖</button>
         </div>
 
         <!-- Split View Secondary Omnibox (visible only in split mode) -->
@@ -95,6 +123,48 @@
         <div class="divider-handle"></div>
       </div>
     </div>
+
+    <!-- V2 Right Slide-out Drawer: AI Research Assistant -->
+    <aside id="ai-drawer" class="side-drawer" style="display: none;">
+      <div class="drawer-header">
+        <div class="drawer-title">
+          <span>🤖</span>
+          <h3>AI Research Assistant</h3>
+        </div>
+        <button id="btn-close-ai" class="btn-close-modal">✕</button>
+      </div>
+      <div class="drawer-actions-bar">
+        <button id="btn-ai-summarize" class="drawer-pill-btn active">📑 Summarize Page</button>
+        <button id="btn-ai-compare" class="drawer-pill-btn">⚖️ Compare Tabs</button>
+      </div>
+      <div id="ai-content-area" class="drawer-content">
+        <div class="ai-welcome-box">
+          <p><strong>Scoped & Private AI Research</strong></p>
+          <p class="muted-text">Analyze active web content or synthesize multiple tabs with direct source citations.</p>
+        </div>
+      </div>
+      <div class="drawer-input-footer">
+        <input type="text" id="ai-query-input" placeholder="Ask a question about this page..." autocomplete="off">
+        <button id="btn-ai-send" class="btn-send">Ask</button>
+      </div>
+    </aside>
+
+    <!-- V2 Right Slide-out Drawer: Smart Library 2.0 -->
+    <aside id="library-drawer" class="side-drawer" style="display: none;">
+      <div class="drawer-header">
+        <div class="drawer-title">
+          <span>📚</span>
+          <h3>Smart Library & Excerpts</h3>
+        </div>
+        <button id="btn-close-library" class="btn-close-modal">✕</button>
+      </div>
+      <div class="drawer-search-bar">
+        <input type="text" id="library-search-input" placeholder="Search saved excerpts & notes...">
+      </div>
+      <div id="library-items-container" class="drawer-content">
+        <!-- Rendered dynamically -->
+      </div>
+    </aside>
   </div>
 
   <!-- Privacy Shield Popup Modal -->
@@ -141,6 +211,51 @@
       </div>
       <div id="command-results" class="command-results-list">
         <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Automations Rule Engine Modal (Ctrl+Shift+U) -->
+  <div id="automations-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="width: 520px;">
+      <div class="modal-header">
+        <h3>Browser Automations Engine</h3>
+        <button id="btn-close-rules" class="btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="sub-label">Automatically route domains, mute tabs, and organize your workspaces.</p>
+        <div id="rules-list-container" class="rules-list">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <div class="new-rule-section">
+          <h4>Add New Routing Rule</h4>
+          <input type="text" id="rule-name-input" placeholder="Rule Name (e.g. Work PRs)" style="margin-bottom: 8px;">
+          <input type="text" id="rule-pattern-input" placeholder="Domain Pattern (e.g. jira.com|confluence)" style="margin-bottom: 8px;">
+          <select id="rule-ws-select" style="margin-bottom: 12px;"></select>
+          <button id="btn-save-new-rule" class="btn-primary">Add Automation Rule</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Focus Session Modal -->
+  <div id="focus-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="width: 380px;">
+      <div class="modal-header">
+        <h3>Focus Session</h3>
+        <button id="btn-close-focus" class="btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body" style="text-align: center;">
+        <span style="font-size: 36px; display: block; margin-bottom: 8px;">⏱️</span>
+        <p class="sub-label">Block social media distractions and enter deep work mode.</p>
+        <div class="focus-duration-row">
+          <button class="btn-duration selected" data-minutes="25">25 Min</button>
+          <button class="btn-duration" data-minutes="45">45 Min</button>
+          <button class="btn-duration" data-minutes="15">15 Min</button>
+        </div>
+        <button id="btn-start-focus" class="btn-primary" style="margin-top: 14px; width: 100%;">Start Focus Session</button>
+        <button id="btn-stop-focus" class="btn-secondary" style="margin-top: 8px; width: 100%; display: none;">Stop Focus Session</button>
       </div>
     </div>
   </div>

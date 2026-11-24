@@ -381,11 +381,345 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --------------------------------------------------------------------------
-  // Global Keyboard Shortcuts
+  // V2 Feature: AI Research Assistant Drawer
+  // --------------------------------------------------------------------------
+  const btnAiAssistant = document.getElementById('btn-ai-assistant');
+  const aiDrawer = document.getElementById('ai-drawer');
+  const btnCloseAi = document.getElementById('btn-close-ai');
+  const btnAiSummarize = document.getElementById('btn-ai-summarize');
+  const btnAiCompare = document.getElementById('btn-ai-compare');
+  const aiContentArea = document.getElementById('ai-content-area');
+  const aiQueryInput = document.getElementById('ai-query-input');
+  const btnAiSend = document.getElementById('btn-ai-send');
+
+  function toggleAiDrawer() {
+    const isShown = aiDrawer.style.display === 'flex';
+    aiDrawer.style.display = isShown ? 'none' : 'flex';
+    if (!isShown) {
+      libraryDrawer.style.display = 'none';
+    }
+  }
+
+  btnAiAssistant.addEventListener('click', toggleAiDrawer);
+  btnCloseAi.addEventListener('click', () => { aiDrawer.style.display = 'none'; });
+
+  btnAiSummarize.addEventListener('click', async () => {
+    btnAiSummarize.classList.add('active');
+    btnAiCompare.classList.remove('active');
+    aiContentArea.innerHTML = '<div class="ai-welcome-box"><p>⏳ Extracting and synthesizing page content...</p></div>';
+
+    const res = await window.vibezApi.aiSummarizeActivePage();
+    if (!res || !res.summary) {
+      aiContentArea.innerHTML = '<div class="ai-welcome-box"><p>Unable to extract text from this page.</p></div>';
+      return;
+    }
+
+    aiContentArea.innerHTML = `
+      <div class="ai-summary-card">
+        <h4>📑 Executive Summary</h4>
+        <p>${res.summary}</p>
+        ${res.keyTakeaways && res.keyTakeaways.length > 0 ? `
+          <h4 style="margin-top: 12px;">💡 Key Takeaways</h4>
+          ${res.keyTakeaways.map(t => `<div class="ai-takeaway-item">${t}</div>`).join('')}
+        ` : ''}
+        ${res.citations && res.citations.length > 0 ? `
+          <div class="ai-citation-tag">🔗 ${res.citations[0].label}: ${res.citations[0].excerpt.slice(0, 70)}...</div>
+        ` : ''}
+      </div>
+    `;
+  });
+
+  btnAiCompare.addEventListener('click', async () => {
+    btnAiCompare.classList.add('active');
+    btnAiSummarize.classList.remove('active');
+    aiContentArea.innerHTML = '<div class="ai-welcome-box"><p>⏳ Comparing active workspace tabs...</p></div>';
+
+    const res = await window.vibezApi.aiCompareWorkspaceTabs();
+    if (!res || !res.sources || res.sources.length === 0) {
+      aiContentArea.innerHTML = '<div class="ai-welcome-box"><p>Open 2 or more tabs in this workspace to compare them.</p></div>';
+      return;
+    }
+
+    aiContentArea.innerHTML = `
+      <div class="ai-summary-card">
+        <h4>⚖️ Cross-Tab Synthesis (${res.totalSources} Tabs)</h4>
+        <p class="muted-text">${res.overview}</p>
+        <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+          ${res.sources.map(s => `
+            <div style="background: var(--bg-dark); padding: 8px; border-radius: 6px;">
+              <strong style="color: var(--text-primary); font-size: 11px;">${s.title}</strong>
+              <div class="muted-text">Focus: ${s.coreFocus} (${s.wordCount} words)</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  });
+
+  async function handleAiQuestion() {
+    const q = aiQueryInput.value.trim();
+    if (!q) return;
+    aiQueryInput.value = '';
+
+    aiContentArea.insertAdjacentHTML('beforeend', `
+      <div style="background: rgba(59, 130, 246, 0.1); border-left: 2px solid var(--accent-blue); padding: 8px 12px; border-radius: 4px; font-size: 12px; margin-top: 8px;">
+        <strong>Q:</strong> ${q}
+      </div>
+      <div id="ai-loading-answer" class="muted-text" style="padding: 6px 12px;">Analyzing text passages...</div>
+    `);
+    aiContentArea.scrollTop = aiContentArea.scrollHeight;
+
+    const res = await window.vibezApi.aiAskQuestion(q);
+    const loadingEl = document.getElementById('ai-loading-answer');
+    if (loadingEl) loadingEl.remove();
+
+    aiContentArea.insertAdjacentHTML('beforeend', `
+      <div class="ai-summary-card" style="margin-top: 6px;">
+        <p><strong>A:</strong> ${res.answer}</p>
+        ${res.citations && res.citations.length > 0 ? `
+          <div class="ai-citation-tag">Cited: "${res.citations[0].quote.slice(0, 65)}..."</div>
+        ` : ''}
+      </div>
+    `);
+    aiContentArea.scrollTop = aiContentArea.scrollHeight;
+  }
+
+  btnAiSend.addEventListener('click', handleAiQuestion);
+  aiQueryInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleAiQuestion();
+  });
+
+  // --------------------------------------------------------------------------
+  // V2 Feature: Smart Library 2.0 Drawer
+  // --------------------------------------------------------------------------
+  const btnLibrary = document.getElementById('btn-library');
+  const libraryDrawer = document.getElementById('library-drawer');
+  const btnCloseLibrary = document.getElementById('btn-close-library');
+  const librarySearchInput = document.getElementById('library-search-input');
+  const libraryItemsContainer = document.getElementById('library-items-container');
+  const btnSaveLibrary = document.getElementById('btn-save-library');
+
+  function toggleLibraryDrawer() {
+    const isShown = libraryDrawer.style.display === 'flex';
+    libraryDrawer.style.display = isShown ? 'none' : 'flex';
+    if (!isShown) {
+      aiDrawer.style.display = 'none';
+      loadLibraryItems();
+    }
+  }
+
+  btnLibrary.addEventListener('click', toggleLibraryDrawer);
+  btnCloseLibrary.addEventListener('click', () => { libraryDrawer.style.display = 'none'; });
+
+  async function loadLibraryItems(query = '') {
+    const items = query ? await window.vibezApi.searchLibrary(query) : (await window.vibezApi.getLibraryItems()).items;
+    libraryItemsContainer.innerHTML = '';
+    if (!items || items.length === 0) {
+      libraryItemsContainer.innerHTML = '<div class="muted-text" style="text-align: center; padding: 20px;">No saved library items</div>';
+      return;
+    }
+
+    items.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'lib-card';
+      card.innerHTML = `
+        <div class="lib-card-title">${item.title}</div>
+        <div class="lib-card-excerpt">${item.excerpt || item.notes || item.url}</div>
+        <div class="lib-card-meta">
+          <span>${new Date(item.createdAt).toLocaleDateString()}</span>
+          <button class="btn-del-item" title="Delete excerpt">🗑️</button>
+        </div>
+      `;
+
+      card.querySelector('.btn-del-item').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await window.vibezApi.deleteLibraryItem(item.id);
+        loadLibraryItems(librarySearchInput.value);
+      });
+
+      card.addEventListener('click', () => {
+        if (item.url) window.vibezApi.navigate(item.url);
+      });
+
+      libraryItemsContainer.appendChild(card);
+    });
+  }
+
+  librarySearchInput.addEventListener('input', (e) => {
+    loadLibraryItems(e.target.value);
+  });
+
+  btnSaveLibrary.addEventListener('click', async () => {
+    if (currentActiveTab) {
+      await window.vibezApi.saveLibraryItem({
+        title: currentActiveTab.title || 'Saved Page',
+        url: currentActiveTab.url || '',
+        excerpt: `Bookmarked from ${currentActiveTab.title}`,
+        notes: `Saved on ${new Date().toLocaleString()}`,
+        tags: ['web']
+      });
+      btnSaveLibrary.textContent = '✅';
+      setTimeout(() => { btnSaveLibrary.textContent = '🔖'; }, 1500);
+    }
+  });
+
+  // --------------------------------------------------------------------------
+  // V2 Feature: Automations Rule Engine Modal
+  // --------------------------------------------------------------------------
+  const btnAutomations = document.getElementById('btn-automations');
+  const automationsModal = document.getElementById('automations-modal');
+  const btnCloseRules = document.getElementById('btn-close-rules');
+  const rulesListContainer = document.getElementById('rules-list-container');
+  const ruleNameInput = document.getElementById('rule-name-input');
+  const rulePatternInput = document.getElementById('rule-pattern-input');
+  const ruleWsSelect = document.getElementById('rule-ws-select');
+  const btnSaveNewRule = document.getElementById('btn-save-new-rule');
+  const automationToast = document.getElementById('automation-toast');
+  const automationToastText = document.getElementById('automation-toast-text');
+
+  async function openAutomationsModal() {
+    automationsModal.style.display = 'flex';
+    populateWorkspaceSelect();
+    loadAutomationRules();
+  }
+
+  function populateWorkspaceSelect() {
+    ruleWsSelect.innerHTML = '';
+    currentWorkspaces.forEach(ws => {
+      const opt = document.createElement('option');
+      opt.value = ws.id;
+      opt.textContent = `${ws.icon} ${ws.name}`;
+      ruleWsSelect.appendChild(opt);
+    });
+  }
+
+  async function loadAutomationRules() {
+    const rules = await window.vibezApi.getAutomationRules();
+    rulesListContainer.innerHTML = '';
+    rules.forEach(rule => {
+      const item = document.createElement('div');
+      item.className = 'rule-item';
+      item.innerHTML = `
+        <div>
+          <div class="rule-name">${rule.name}</div>
+          <div class="rule-pattern">Regex: <code>${rule.pattern}</code> ➔ Workspace: <strong>${rule.targetWorkspaceId}</strong></div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <label class="switch">
+            <input type="checkbox" ${rule.enabled ? 'checked' : ''} class="rule-toggle-switch">
+            <span class="slider round"></span>
+          </label>
+          <button class="btn-del-item btn-del-rule">✕</button>
+        </div>
+      `;
+
+      item.querySelector('.rule-toggle-switch').addEventListener('change', async () => {
+        await window.vibezApi.toggleAutomationRule(rule.id);
+      });
+
+      item.querySelector('.btn-del-rule').addEventListener('click', async () => {
+        await window.vibezApi.deleteAutomationRule(rule.id);
+        loadAutomationRules();
+      });
+
+      rulesListContainer.appendChild(item);
+    });
+  }
+
+  btnAutomations.addEventListener('click', openAutomationsModal);
+  btnCloseRules.addEventListener('click', () => { automationsModal.style.display = 'none'; });
+
+  btnSaveNewRule.addEventListener('click', async () => {
+    const name = ruleNameInput.value.trim();
+    const pattern = rulePatternInput.value.trim();
+    const targetWs = ruleWsSelect.value;
+
+    if (name && pattern && targetWs) {
+      await window.vibezApi.addAutomationRule(name, pattern, targetWs);
+      ruleNameInput.value = '';
+      rulePatternInput.value = '';
+      loadAutomationRules();
+    }
+  });
+
+  window.vibezApi.onAutomationTriggered(({ message }) => {
+    automationToastText.textContent = `⚡ ${message}`;
+    automationToast.style.display = 'block';
+    setTimeout(() => { automationToast.style.display = 'none'; }, 3500);
+  });
+
+  // --------------------------------------------------------------------------
+  // V2 Feature: Focus Sessions (Pomodoro & Distraction Blocker)
+  // --------------------------------------------------------------------------
+  const btnFocus = document.getElementById('btn-focus');
+  const focusModal = document.getElementById('focus-modal');
+  const btnCloseFocus = document.getElementById('btn-close-focus');
+  const focusPill = document.getElementById('focus-pill');
+  const focusTimeLabel = document.getElementById('focus-time-label');
+  const btnStartFocus = document.getElementById('btn-start-focus');
+  const btnStopFocus = document.getElementById('btn-stop-focus');
+  let selectedFocusMinutes = 25;
+
+  document.querySelectorAll('.btn-duration').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.btn-duration').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedFocusMinutes = parseInt(btn.dataset.minutes);
+    });
+  });
+
+  btnFocus.addEventListener('click', () => { focusModal.style.display = 'flex'; });
+  btnCloseFocus.addEventListener('click', () => { focusModal.style.display = 'none'; });
+
+  btnStartFocus.addEventListener('click', async () => {
+    focusModal.style.display = 'none';
+    const status = await window.vibezApi.startFocusSession(selectedFocusMinutes);
+    updateFocusUI(status);
+  });
+
+  btnStopFocus.addEventListener('click', async () => {
+    const status = await window.vibezApi.stopFocusSession();
+    updateFocusUI(status);
+  });
+
+  function updateFocusUI(status) {
+    if (status.isActive) {
+      focusPill.style.display = 'flex';
+      focusTimeLabel.textContent = status.formattedTime || '25:00';
+      btnStartFocus.style.display = 'none';
+      btnStopFocus.style.display = 'block';
+    } else {
+      focusPill.style.display = 'none';
+      btnStartFocus.style.display = 'block';
+      btnStopFocus.style.display = 'none';
+    }
+  }
+
+  window.vibezApi.onFocusUpdate((status) => {
+    updateFocusUI(status);
+  });
+
+  // --------------------------------------------------------------------------
+  // Global Keyboard Shortcuts (V1 + V2 Extensions)
   // --------------------------------------------------------------------------
   window.addEventListener('keydown', (e) => {
+    // Ctrl + Shift + A -> AI Assistant
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'a') {
+      e.preventDefault();
+      toggleAiDrawer();
+    }
+    // Ctrl + Shift + L -> Smart Library
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'l') {
+      e.preventDefault();
+      toggleLibraryDrawer();
+    }
+    // Ctrl + Shift + U -> Automations
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'u') {
+      e.preventDefault();
+      openAutomationsModal();
+    }
     // Ctrl + K -> Command Center
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'k') {
       e.preventDefault();
       commandModal.style.display === 'flex' ? closeCommandCenter() : openCommandCenter();
     }
@@ -395,12 +729,12 @@ document.addEventListener('DOMContentLoaded', () => {
       window.vibezApi.toggleSplitView();
     }
     // Ctrl + T -> New Tab
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 't') {
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 't') {
       e.preventDefault();
       window.vibezApi.createTab();
     }
     // Ctrl + W -> Close Tab
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'w') {
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'w') {
       e.preventDefault();
       if (currentActiveTab) window.vibezApi.closeTab(currentActiveTab.id);
     }
@@ -412,11 +746,15 @@ document.addEventListener('DOMContentLoaded', () => {
         window.vibezApi.switchWorkspace(currentWorkspaces[idx].id);
       }
     }
-    // Escape closes modals
+    // Escape closes modals and drawers
     if (e.key === 'Escape') {
       closeCommandCenter();
       shieldModal.style.display = 'none';
       workspaceModal.style.display = 'none';
+      automationsModal.style.display = 'none';
+      focusModal.style.display = 'none';
+      aiDrawer.style.display = 'none';
+      libraryDrawer.style.display = 'none';
     }
   });
 });
