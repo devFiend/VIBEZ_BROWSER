@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings — Vibez</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="page-container">
+    <header class="page-header">
+      <h1 class="page-title">Settings</h1>
+      <p class="sub-label">Manage privacy shields, search engine, and browser preferences.</p>
+    </header>
+
+    <main class="page-content">
+      <!-- Search Engine Section -->
+      <section class="settings-section">
+        <h2 class="section-heading">Search Engine</h2>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Default Search Provider</div>
+            <div class="setting-desc">Choose which engine executes searches from the address bar and new tab.</div>
+          </div>
+          <select id="select-search-engine" class="setting-select">
+            <option value="google">Google</option>
+            <option value="duckduckgo">DuckDuckGo</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Privacy & Security Section (DuckDuckGo & Firefox style) -->
+      <section class="settings-section">
+        <h2 class="section-heading">Enhanced Tracking Protection</h2>
+        
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Protection Level</div>
+            <div class="setting-desc">Balanced blocks trackers on unvisited sites; Strict blocks all known trackers.</div>
+          </div>
+          <select id="select-privacy-preset" class="setting-select">
+            <option value="balanced">Balanced (Recommended)</option>
+            <option value="strict">Strict</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Block Fingerprinting Scripts</div>
+            <div class="setting-desc">Prevents sites from building hardware and canvas profiles of your device.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-fingerprinting" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Block Cryptominers</div>
+            <div class="setting-desc">Neutralizes in-browser mining scripts that consume CPU.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-cryptominers" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Productivity Section -->
+      <section class="settings-section">
+        <h2 class="section-heading">Productivity & Focus</h2>
+        
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Default Focus Session Duration</div>
+            <div class="setting-desc">Standard duration for Pomodoro deep-work focus sessions.</div>
+          </div>
+          <select id="select-focus-duration" class="setting-select">
+            <option value="15">15 Minutes</option>
+            <option value="25">25 Minutes</option>
+            <option value="45">45 Minutes</option>
+            <option value="60">60 Minutes</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- About Vibez -->
+      <section class="settings-section">
+        <h2 class="section-heading">About Vibez Browser</h2>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Vibez Browser v0.1.0 (V2 Architecture)</div>
+            <div class="setting-desc">Open source, privacy-first desktop browser with zero telemetry.</div>
+          </div>
+          <span class="badge-version">Up to date</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../icons.js"></script>
+  <script src="settings.js"></script>
+</body>
+</html>

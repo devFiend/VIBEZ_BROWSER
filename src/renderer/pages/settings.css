@@ -1,0 +1,170 @@
+/* ==========================================================================
+   Vibez Browser — Settings Stylesheet (Firefox Proton styled)
+   ========================================================================== */
+
+:root {
+  --fx-bg: #1C1B22;
+  --fx-surface: #2B2A33;
+  --fx-surface-hover: #42414D;
+  --fx-border: rgba(255, 255, 255, 0.1);
+  --fx-border-subtle: rgba(255, 255, 255, 0.06);
+
+  --fx-text-primary: #FBFBFE;
+  --fx-text-secondary: #CFCFD8;
+  --fx-text-muted: #8F8F9D;
+
+  --fx-blue: #0060DF;
+  --fx-green: #06D6A0;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--fx-bg);
+  color: var(--fx-text-primary);
+  min-height: 100vh;
+  width: 100vw;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page-container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.page-header {
+  margin-bottom: 28px;
+}
+
+.page-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.sub-label {
+  font-size: 13px;
+  color: var(--fx-text-muted);
+}
+
+.settings-section {
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border-subtle);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.section-heading {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--fx-text-primary);
+  border-bottom: 1px solid var(--fx-border-subtle);
+  padding-bottom: 10px;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.setting-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.setting-label {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--fx-text-primary);
+  margin-bottom: 2px;
+}
+
+.setting-desc {
+  font-size: 11.5px;
+  color: var(--fx-text-muted);
+  max-width: 480px;
+  line-height: 1.4;
+}
+
+.setting-select {
+  background: var(--fx-bg);
+  border: 1px solid var(--fx-border);
+  border-radius: 6px;
+  color: var(--fx-text-primary);
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+}
+
+.setting-select:focus {
+  border-color: var(--fx-blue);
+}
+
+/* Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #42414D;
+  transition: .15s;
+  border-radius: 22px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .15s;
+  border-radius: 50%;
+}
+
+input:checked+.slider {
+  background-color: var(--fx-blue);
+}
+
+input:checked+.slider:before {
+  transform: translateX(16px);
+}
+
+.badge-version {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--fx-green);
+  background: rgba(6, 214, 160, 0.12);
+  padding: 4px 8px;
+  border-radius: 4px;
+}

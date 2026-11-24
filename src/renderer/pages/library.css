@@ -1,0 +1,145 @@
+/* ==========================================================================
+   Vibez Browser — Library & Bookmarks Page
+   ========================================================================== */
+
+:root {
+  --fx-bg: #1C1B22;
+  --fx-surface: #2B2A33;
+  --fx-surface-hover: #42414D;
+  --fx-border: rgba(255, 255, 255, 0.1);
+  --fx-border-subtle: rgba(255, 255, 255, 0.06);
+
+  --fx-text-primary: #FBFBFE;
+  --fx-text-secondary: #CFCFD8;
+  --fx-text-muted: #8F8F9D;
+
+  --fx-blue: #0060DF;
+  --fx-red: #E81123;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--fx-bg);
+  color: var(--fx-text-primary);
+  min-height: 100vh;
+  width: 100vw;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page-container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.item-count {
+  font-size: 12px;
+  color: var(--fx-text-muted);
+  margin-left: 8px;
+}
+
+#library-search {
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border);
+  border-radius: 6px;
+  color: var(--fx-text-primary);
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  width: 260px;
+}
+
+#library-search:focus {
+  border-color: var(--fx-blue);
+  box-shadow: 0 0 0 2px rgba(0, 96, 223, 0.35);
+}
+
+.library-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.lib-card-full {
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border-subtle);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.lib-card-full:hover {
+  background: var(--fx-surface-hover);
+  border-color: var(--fx-border);
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fx-text-primary);
+}
+
+.card-excerpt {
+  font-size: 12px;
+  color: var(--fx-text-secondary);
+  line-height: 1.45;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--fx-text-muted);
+}
+
+.btn-del-card {
+  background: transparent;
+  border: none;
+  color: var(--fx-text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.btn-del-card:hover {
+  color: var(--fx-red);
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--fx-text-muted);
+  font-size: 14px;
+}

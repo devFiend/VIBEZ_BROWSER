@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>History — Vibez</title>
+  <link rel="stylesheet" href="history.css">
+</head>
+<body>
+  <div class="page-container">
+    <header class="page-header">
+      <div class="header-left">
+        <h1 class="page-title">Browsing History</h1>
+        <span id="history-count" class="item-count">0 items</span>
+      </div>
+      <div class="header-actions">
+        <input type="text" id="history-search" placeholder="Search history..." autocomplete="off">
+        <button id="btn-clear-history" class="btn-clear">Clear History</button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div id="history-list" class="history-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </main>
+  </div>
+
+  <script src="../icons.js"></script>
+  <script src="history.js"></script>
+</body>
+</html>

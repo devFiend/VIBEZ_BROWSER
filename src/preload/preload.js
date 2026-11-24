@@ -62,6 +62,16 @@ contextBridge.exposeInMainWorld('vibezApi', {
   stopFocusSession: () => ipcRenderer.invoke('focus-stop'),
   getFocusStatus: () => ipcRenderer.invoke('focus-get-status'),
 
+  // History Manager
+  getHistory: (limit) => ipcRenderer.invoke('history-get', { limit }),
+  searchHistory: (query) => ipcRenderer.invoke('history-search', { query }),
+  deleteHistoryEntry: (id) => ipcRenderer.invoke('history-delete', { id }),
+  clearHistory: () => ipcRenderer.invoke('history-clear'),
+
+  // Settings Manager
+  getSettings: () => ipcRenderer.invoke('settings-get'),
+  updateSettings: (newSettings) => ipcRenderer.invoke('settings-update', newSettings),
+
   // Events from Main process
   onStateUpdate: (callback) => {
     ipcRenderer.on('state-update', (_event, state) => callback(state));

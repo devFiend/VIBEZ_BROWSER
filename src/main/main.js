@@ -12,6 +12,8 @@ const { AIResearchAssistant } = require('./ai/research_assistant');
 const { RuleEngine } = require('./automation/rule_engine');
 const { LibraryManager } = require('./library/library_manager');
 const { FocusSessionManager } = require('./focus/focus_session');
+const { HistoryManager } = require('./history/history_manager');
+const { SettingsManager } = require('./settings/settings_manager');
 
 let mainWindow = null;
 let store = null;
@@ -21,6 +23,8 @@ let aiAssistant = null;
 let ruleEngine = null;
 let libraryManager = null;
 let focusManager = null;
+let historyManager = null;
+let settingsManager = null;
 
 // Map of tabId -> WebContentsView
 const tabViews = new Map();
@@ -30,12 +34,22 @@ const SIDEBAR_WIDTH = 0;
 const TOPBAR_HEIGHT = 78;
 
 const NEWTAB_FILE = path.join(__dirname, '../renderer/pages/newtab.html');
+const HISTORY_FILE = path.join(__dirname, '../renderer/pages/history.html');
+const LIBRARY_FILE = path.join(__dirname, '../renderer/pages/library.html');
+const SETTINGS_FILE = path.join(__dirname, '../renderer/pages/settings.html');
+
 const NEWTAB_URL = `file://${NEWTAB_FILE.replace(/\\/g, '/')}`;
+const HISTORY_URL = `file://${HISTORY_FILE.replace(/\\/g, '/')}`;
+const LIBRARY_URL = `file://${LIBRARY_FILE.replace(/\\/g, '/')}`;
+const SETTINGS_URL = `file://${SETTINGS_FILE.replace(/\\/g, '/')}`;
 
 function resolveInternalUrl(url) {
   if (!url || url === 'vibez://newtab' || url === 'about:blank') {
     return NEWTAB_URL;
   }
+  if (url === 'vibez://history') return HISTORY_URL;
+  if (url === 'vibez://library' || url === 'vibez://bookmarks') return LIBRARY_URL;
+  if (url === 'vibez://settings' || url === 'vibez://preferences') return SETTINGS_URL;
   return url;
 }
 
@@ -47,6 +61,8 @@ function initializeStoresAndServices() {
   ruleEngine = new RuleEngine(store, workspaceManager);
   libraryManager = new LibraryManager(store);
   focusManager = new FocusSessionManager(store);
+  historyManager = new HistoryManager(store);
+  settingsManager = new SettingsManager(store);
 
   // Attach privacy shield to default network session
   shield.attachToSession(session.defaultSession);
@@ -95,6 +111,7 @@ function getOrCreateTabView(tab) {
 
   const view = new WebContentsView({
     webPreferences: {
+      preload: path.join(__dirname, '../preload/preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true
@@ -112,9 +129,20 @@ function getOrCreateTabView(tab) {
   view.webContents.on('did-finish-load', () => {
     let url = view.webContents.getURL();
     let title = view.webContents.getTitle() || 'New Tab';
-    if (url.includes('newtab.html') || url.startsWith('file://')) {
+    if (url.includes('newtab.html') || url === NEWTAB_URL) {
       url = 'vibez://newtab';
       title = 'New Tab';
+    } else if (url.includes('history.html') || url === HISTORY_URL) {
+      url = 'vibez://history';
+      title = 'History';
+    } else if (url.includes('library.html') || url === LIBRARY_URL) {
+      url = 'vibez://library';
+      title = 'Smart Library';
+    } else if (url.includes('settings.html') || url === SETTINGS_URL) {
+      url = 'vibez://settings';
+      title = 'Settings';
+    } else if (!url.startsWith('file://') && !url.startsWith('vibez://')) {
+      historyManager.addEntry(url, title);
     }
     const navHistory = view.webContents.navigationHistory;
     const canGoBack = navHistory ? navHistory.canGoBack() : view.webContents.canGoBack();
@@ -295,11 +323,13 @@ function setupIpcHandlers() {
     let targetUrl = (url || '').trim();
     if (!targetUrl || targetUrl === 'vibez://newtab') {
       targetUrl = NEWTAB_URL;
+    } else if (targetUrl.startsWith('vibez://')) {
+      targetUrl = resolveInternalUrl(targetUrl);
     } else if (!/^https?:\/\//i.test(targetUrl) && !targetUrl.startsWith('file://')) {
       if (targetUrl.includes('.') && !targetUrl.includes(' ')) {
         targetUrl = 'https://' + targetUrl;
       } else {
-        targetUrl = `https://www.google.com/search?q=${encodeURIComponent(targetUrl)}`;
+        targetUrl = settingsManager.getSearchUrl(targetUrl);
       }
     }
 
@@ -586,6 +616,16 @@ function setupIpcHandlers() {
   });
 
   ipcMain.handle('focus-get-status', () => focusManager.getStatus());
+
+  // History Manager
+  ipcMain.handle('history-get', (_event, { limit } = {}) => historyManager.getEntries(limit));
+  ipcMain.handle('history-search', (_event, { query }) => historyManager.search(query));
+  ipcMain.handle('history-delete', (_event, { id }) => historyManager.deleteEntry(id));
+  ipcMain.handle('history-clear', () => historyManager.clear());
+
+  // Settings Manager
+  ipcMain.handle('settings-get', () => settingsManager.getSettings());
+  ipcMain.handle('settings-update', (_event, newSettings) => settingsManager.updateSettings(newSettings));
 }
 
 app.whenReady().then(() => {

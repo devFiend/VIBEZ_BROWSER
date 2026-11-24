@@ -108,11 +108,20 @@ document.addEventListener('DOMContentLoaded', () => {
   // DuckDuckGo Fire Button
   if (btnFire) {
     btnFire.addEventListener('click', () => {
+      triggerFireAnimation();
       if (currentActiveTab) {
         window.vibezApi.navigate('vibez://newtab');
-        showShellToast('Burned: Tab session reset');
+        showShellToast('Fire: Browsing session burned');
       }
     });
+  }
+
+  function triggerFireAnimation() {
+    const chromeEl = document.getElementById('browser-chrome');
+    if (chromeEl) {
+      chromeEl.classList.add('fire-burning');
+      setTimeout(() => chromeEl.classList.remove('fire-burning'), 600);
+    }
   }
 
   // Workspaces Dropdown
@@ -460,6 +469,9 @@ document.addEventListener('DOMContentLoaded', () => {
       window.vibezApi.switchTab(item.tabId);
     } else if (item.type === 'command') {
       if (item.commandId === 'cmd_new_tab') window.vibezApi.createTab();
+      if (item.commandId === 'cmd_history') window.vibezApi.createTab('vibez://history');
+      if (item.commandId === 'cmd_library') window.vibezApi.createTab('vibez://library');
+      if (item.commandId === 'cmd_settings') window.vibezApi.createTab('vibez://settings');
       if (item.commandId === 'cmd_split_view') window.vibezApi.toggleSplitView();
       if (item.commandId === 'cmd_swap_split') window.vibezApi.swapSplitPanes();
       if (item.commandId === 'cmd_devtools') window.vibezApi.openDevTools();
@@ -887,6 +899,21 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         window.vibezApi.switchWorkspace(currentWorkspaces[idx].id);
       }
+    }
+    // Ctrl + H -> History
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'h') {
+      e.preventDefault();
+      window.vibezApi.createTab('vibez://history');
+    }
+    // Ctrl + B -> Bookmarks / Library
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'b') {
+      e.preventDefault();
+      window.vibezApi.createTab('vibez://library');
+    }
+    // Ctrl + , -> Settings
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === ',') {
+      e.preventDefault();
+      window.vibezApi.createTab('vibez://settings');
     }
     if (e.key === 'Escape') {
       closeCommandCenter();

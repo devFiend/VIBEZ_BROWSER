@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookmarks & Library — Vibez</title>
+  <link rel="stylesheet" href="library.css">
+</head>
+<body>
+  <div class="page-container">
+    <header class="page-header">
+      <div class="header-left">
+        <h1 class="page-title">Smart Library & Bookmarks</h1>
+        <span id="library-count" class="item-count">0 items</span>
+      </div>
+      <div class="header-actions">
+        <input type="text" id="library-search" placeholder="Search excerpts & notes..." autocomplete="off">
+      </div>
+    </header>
+
+    <main class="page-content">
+      <div id="library-grid" class="library-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </main>
+  </div>
+
+  <script src="../icons.js"></script>
+  <script src="library.js"></script>
+</body>
+</html>
