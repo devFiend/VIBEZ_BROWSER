@@ -1,30 +1,35 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+/* ==========================================================================
+   Vibez Browser — Shell Chrome  |  Original Design System
+   Midnight base + indigo accent + teal secondary. Inter typeface.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg-dark: #12141C;
-  --bg-sidebar: #131620;
-  --bg-header: #171A24;
-  --bg-surface: #1E2230;
-  --bg-surface-hover: #262B3D;
-  --bg-card: rgba(26, 31, 45, 0.85);
+  --bg-dark: #0A0E1A;
+  --bg-sidebar: #0C1020;
+  --bg-header: #0F1322;
+  --bg-surface: #151929;
+  --bg-surface-hover: #1C2140;
+  --bg-card: rgba(21, 25, 41, 0.85);
 
-  --border-color: rgba(255, 255, 255, 0.07);
-  --border-active: #EB5757;
-  --border-glass: rgba(255, 255, 255, 0.12);
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-active: #6366F1;
+  --border-glass: rgba(255, 255, 255, 0.1);
 
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
+  --text-primary: #E8ECF4;
+  --text-secondary: #8B92A8;
+  --text-muted: #5C6378;
 
-  --accent-coral: #EB5757;
-  --accent-coral-hover: #F06868;
+  --accent: #6366F1;
+  --accent-hover: #818CF8;
   --accent-blue: #3B82F6;
-  --accent-green: #10B981;
+  --accent-green: #06D6A0;
   --accent-purple: #8B5CF6;
   --accent-amber: #F59E0B;
   --accent-crimson: #EF4444;
 
-  --sidebar-width: 58px;
+  --sidebar-width: 54px;
   --header-height: 82px;
 }
 
@@ -36,7 +41,7 @@
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: var(--bg-dark);
   color: var(--text-primary);
   overflow: hidden;
@@ -52,7 +57,7 @@ body {
 }
 
 /* ==========================================================================
-   Left Navigation Rail (Sidebar Floating Dock)
+   Left Sidebar Rail
    ========================================================================== */
 #sidebar {
   width: var(--sidebar-width);
@@ -64,77 +69,11 @@ body {
   padding: 12px 0 16px 0;
   z-index: 100;
   -webkit-app-region: drag;
-  gap: 8px;
-}
-
-/* Dock Apps List (Matches Reference Design) */
-.dock-apps-list {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  -webkit-app-region: no-drag;
-}
-
-.dock-app-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background-color: #1E2332;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  position: relative;
-  overflow: hidden;
-}
-
-.dock-app-btn:hover {
-  transform: scale(1.12);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-}
-
-.dock-svg-slot {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dock-svg-slot svg {
-  width: 22px;
-  height: 22px;
-}
-
-.brand-gmail {
-  background-color: #FFFFFF;
-}
-
-.brand-instagram {
-  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
-}
-
-.brand-discord {
-  background-color: #5865F2;
-}
-
-.brand-telegram {
-  background-color: #29B6F6;
-}
-
-.brand-facebook {
-  background-color: #1877F2;
-}
-
-.brand-linkedin {
-  background-color: #0A66C2;
+  gap: 6px;
 }
 
 .rail-divider {
-  width: 28px;
+  width: 26px;
   height: 1px;
   background-color: var(--border-color);
   margin: 4px 0;
@@ -143,15 +82,16 @@ body {
 .rail-nav {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
   align-items: center;
   -webkit-app-region: no-drag;
 }
 
-.rail-btn, .ws-btn {
-  width: 36px;
-  height: 36px;
+.rail-btn,
+.ws-btn {
+  width: 34px;
+  height: 34px;
   border-radius: 10px;
   background-color: transparent;
   border: 1px solid transparent;
@@ -163,9 +103,13 @@ body {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   -webkit-app-region: no-drag;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
 }
 
-.rail-btn:hover, .ws-btn:hover {
+.rail-btn:hover,
+.ws-btn:hover {
   background-color: var(--bg-surface-hover);
   color: var(--text-primary);
   transform: scale(1.06);
@@ -174,45 +118,45 @@ body {
 .ws-btn.active {
   background-color: var(--bg-surface);
   color: #fff;
-  border-color: var(--ws-color, var(--accent-coral));
-  box-shadow: 0 0 12px rgba(235, 87, 87, 0.3);
+  border-color: var(--ws-color, var(--accent));
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.25);
 }
 
 .ws-btn.active::before {
   content: '';
   position: absolute;
   left: -8px;
-  width: 4px;
-  height: 18px;
-  background-color: var(--ws-color, var(--accent-coral));
-  border-radius: 0 4px 4px 0;
+  width: 3px;
+  height: 16px;
+  background-color: var(--ws-color, var(--accent));
+  border-radius: 0 3px 3px 0;
 }
 
 .rail-spacer {
   flex: 1;
 }
 
-/* Red Circular Settings Gear Button (At Bottom of Sidebar) */
+/* Settings Button */
 .dock-settings-btn {
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background-color: var(--accent-coral);
+  background-color: var(--accent);
   color: #FFFFFF;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(235, 87, 87, 0.4);
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   -webkit-app-region: no-drag;
 }
 
 .dock-settings-btn:hover {
-  background-color: var(--accent-coral-hover);
+  background-color: var(--accent-hover);
   transform: scale(1.1) rotate(15deg);
-  box-shadow: 0 6px 20px rgba(235, 87, 87, 0.6);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
 }
 
 /* ==========================================================================
@@ -237,41 +181,7 @@ body {
   gap: 12px;
 }
 
-/* Traffic Lights Group (Mac/Modern rounded window dots) */
-.traffic-lights-group {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  -webkit-app-region: no-drag;
-}
-
-.traffic-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-
-.traffic-dot:hover {
-  transform: scale(1.15);
-  opacity: 0.85;
-}
-
-.dot-close {
-  background-color: #FF5F56;
-}
-
-.dot-min {
-  background-color: #FFBD2E;
-}
-
-.dot-max {
-  background-color: #27C93F;
-}
-
-/* Floating Tab Strip */
+/* Tab Strip */
 #tab-strip-container {
   flex: 1;
   display: flex;
@@ -283,7 +193,7 @@ body {
 
 #tab-strip {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   overflow-x: auto;
   scrollbar-width: none;
   padding: 4px 0;
@@ -294,18 +204,18 @@ body {
 }
 
 .tab-item {
-  height: 32px;
-  min-width: 140px;
-  max-width: 220px;
+  height: 30px;
+  min-width: 130px;
+  max-width: 200px;
   background-color: var(--bg-surface);
   border: 1px solid var(--border-color);
-  border-radius: 9999px;
-  padding: 0 12px;
+  border-radius: 8px;
+  padding: 0 10px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 500;
   color: var(--text-secondary);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -318,9 +228,9 @@ body {
 
 .tab-item.active {
   background-color: var(--bg-dark);
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.12);
   color: #fff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .tab-title {
@@ -333,24 +243,24 @@ body {
 .tab-close {
   width: 16px;
   height: 16px;
-  border-radius: 50%;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.5;
+  opacity: 0.4;
   transition: all 0.15s ease;
 }
 
 .tab-close:hover {
-  background-color: rgba(235, 87, 87, 0.25);
-  color: var(--accent-coral);
+  background-color: rgba(239, 68, 68, 0.2);
+  color: var(--accent-crimson);
   opacity: 1;
 }
 
 .tab-btn-add {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
   background: transparent;
   border: none;
   color: var(--text-secondary);
@@ -367,7 +277,7 @@ body {
   color: var(--text-primary);
 }
 
-/* Windows 11 Fluent Window Controls */
+/* Windows Fluent Controls */
 .window-controls {
   display: flex;
   height: 100%;
@@ -398,7 +308,7 @@ body {
 }
 
 /* ==========================================================================
-   Glass Omnibox Bar
+   Omnibox Bar
    ========================================================================== */
 #omnibox-bar {
   height: 40px;
@@ -440,9 +350,9 @@ body {
 .url-input-container {
   flex: 1;
   height: 32px;
-  background-color: #1A1E2B;
+  background-color: #111527;
   border: 1px solid var(--border-color);
-  border-radius: 9999px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   padding: 0 12px;
@@ -452,18 +362,23 @@ body {
 }
 
 .url-input-container:focus-within {
-  border-color: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
-  background-color: #161925;
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }
 
-.url-brand-orb {
+.url-lock-icon {
   display: flex;
   align-items: center;
-  justify-content: center;
+  color: var(--text-muted);
 }
 
-#url-input, #split-url-input {
+.url-lock-icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+#url-input,
+#split-url-input {
   flex: 1;
   background: transparent;
   border: none;
@@ -474,7 +389,8 @@ body {
   font-weight: 500;
 }
 
-#url-input::placeholder, #split-url-input::placeholder {
+#url-input::placeholder,
+#split-url-input::placeholder {
   color: var(--text-muted);
 }
 
@@ -494,11 +410,11 @@ body {
   color: var(--text-primary);
 }
 
-/* Toolbar Actions Group (Right of Omnibox) */
+/* Toolbar Actions */
 .toolbar-actions-group {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .toolbar-btn {
@@ -523,14 +439,14 @@ body {
 .shield-btn {
   padding: 0 8px;
   gap: 5px;
-  background-color: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  border-radius: 9999px;
+  background-color: rgba(6, 214, 160, 0.08);
+  border: 1px solid rgba(6, 214, 160, 0.2);
+  border-radius: 8px;
   color: var(--accent-green);
 }
 
 .shield-btn:hover {
-  background-color: rgba(16, 185, 129, 0.2);
+  background-color: rgba(6, 214, 160, 0.16);
 }
 
 .shield-badge {
@@ -539,7 +455,7 @@ body {
   color: var(--accent-green);
 }
 
-/* User Profile Avatar Pill */
+/* User Avatar */
 .user-avatar-pill {
   cursor: pointer;
   padding: 2px;
@@ -551,7 +467,7 @@ body {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -560,13 +476,13 @@ body {
 }
 
 .user-avatar-pill:hover .avatar-ring {
-  border-color: var(--accent-coral);
+  border-color: var(--accent);
 }
 
 .avatar-img-badge {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #EB5757 0%, #7638FA 100%);
+  background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
   color: #fff;
   font-size: 11px;
   font-weight: 700;
@@ -580,7 +496,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(245, 158, 11, 0.15);
+  background: rgba(245, 158, 11, 0.12);
   border: 1px solid var(--accent-amber);
   color: var(--accent-amber);
   padding: 3px 10px;
@@ -614,14 +530,14 @@ body {
   border: 1px solid var(--accent-purple);
   color: var(--text-primary);
   padding: 6px 14px;
-  border-radius: 20px;
+  border-radius: 8px;
   font-size: 11px;
   font-weight: 500;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
   z-index: 1000;
 }
 
-/* Draggable Split Divider */
+/* Split Divider */
 #split-divider {
   position: absolute;
   top: var(--header-height);
@@ -637,7 +553,7 @@ body {
 }
 
 #split-divider:hover {
-  background: var(--accent-coral);
+  background: var(--accent);
 }
 
 .divider-handle {
@@ -648,14 +564,14 @@ body {
 }
 
 /* ==========================================================================
-   V2 Slide-out Drawers (AI Research Assistant & Smart Library)
+   Slide-out Drawers (AI + Library)
    ========================================================================== */
 .side-drawer {
   position: absolute;
   top: var(--header-height);
   right: 0;
   bottom: 0;
-  width: 390px;
+  width: 380px;
   background-color: var(--bg-header);
   border-left: 1px solid var(--border-color);
   box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
@@ -677,7 +593,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--accent-coral);
+  color: var(--accent);
 }
 
 .drawer-title h3 {
@@ -705,6 +621,7 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
+  font-family: inherit;
 }
 
 .drawer-pill-btn:hover {
@@ -713,9 +630,9 @@ body {
 }
 
 .drawer-pill-btn.active {
-  background: var(--accent-coral);
+  background: var(--accent);
   color: #fff;
-  border-color: var(--accent-coral);
+  border-color: var(--accent);
 }
 
 .drawer-content {
@@ -753,7 +670,7 @@ body {
 
 .ai-summary-card h4 {
   font-size: 13px;
-  color: var(--accent-coral);
+  color: var(--accent);
   margin-bottom: 8px;
 }
 
@@ -765,16 +682,20 @@ body {
 }
 
 .ai-takeaway-item::before {
-  content: '•';
+  content: '';
   position: absolute;
   left: 0;
-  color: var(--accent-coral);
+  top: 7px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
 }
 
 .ai-citation-tag {
   display: inline-block;
-  background: rgba(235, 87, 87, 0.15);
-  color: var(--accent-coral);
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--accent);
   font-size: 10px;
   font-weight: 500;
   padding: 3px 8px;
@@ -807,7 +728,7 @@ body {
 }
 
 .btn-send {
-  background: var(--accent-coral);
+  background: var(--accent);
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -816,6 +737,7 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.15s ease;
+  font-family: inherit;
 }
 
 .btn-send:hover {
@@ -854,7 +776,7 @@ body {
 
 .lib-card:hover {
   background: var(--bg-surface-hover);
-  border-color: var(--accent-coral);
+  border-color: var(--accent);
   transform: translateY(-2px);
 }
 
@@ -893,12 +815,12 @@ body {
 }
 
 /* ==========================================================================
-   Modals & Popups (Command Center, Privacy Shield, Automations)
+   Modals
    ========================================================================== */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(14, 18, 25, 0.75);
+  background: rgba(6, 8, 16, 0.78);
   backdrop-filter: blur(8px);
   z-index: 1000;
   display: flex;
@@ -923,6 +845,12 @@ body {
   justify-content: space-between;
 }
 
+.modal-header h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
 .btn-close-modal {
   background: transparent;
   border: none;
@@ -938,7 +866,7 @@ body {
   color: var(--text-primary);
 }
 
-/* Privacy Shield Modal */
+/* Shield Modal */
 .shield-title {
   display: flex;
   align-items: center;
@@ -1006,12 +934,12 @@ body {
   border-radius: 50%;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: var(--accent-green);
   border-color: var(--accent-green);
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   transform: translateX(18px);
 }
 
@@ -1049,9 +977,21 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   gap: 6px;
+  padding-left: 12px;
+  position: relative;
 }
 
-/* Command Center Modal */
+.feature-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent-green);
+}
+
+/* Command Center */
 .command-card {
   width: 580px;
 }
@@ -1108,26 +1048,21 @@ input:checked + .slider:before {
   transition: background-color 0.15s ease;
 }
 
-.command-item:hover, .command-item.selected {
+.command-item:hover,
+.command-item.selected {
   background-color: var(--bg-surface-hover);
 }
 
-.command-item-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.command-item-title {
+  font-weight: 500;
 }
 
-.command-badge {
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: var(--bg-surface);
+.command-item-sub {
+  font-size: 11px;
   color: var(--text-muted);
 }
 
-/* Automations Modal */
+/* Automations */
 .rules-list {
   max-height: 220px;
   overflow-y: auto;
@@ -1137,7 +1072,7 @@ input:checked + .slider:before {
   margin-top: 8px;
 }
 
-.rule-row {
+.rule-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1145,6 +1080,16 @@ input:checked + .slider:before {
   background: var(--bg-surface);
   border-radius: 6px;
   font-size: 12px;
+}
+
+.rule-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rule-pattern {
+  font-size: 10px;
+  color: var(--text-muted);
 }
 
 .new-rule-section {
@@ -1159,7 +1104,8 @@ input:checked + .slider:before {
   color: var(--text-secondary);
 }
 
-.new-rule-section input, .new-rule-section select {
+.new-rule-section input,
+.new-rule-section select {
   width: 100%;
   background: var(--bg-dark);
   border: 1px solid var(--border-color);
@@ -1171,7 +1117,19 @@ input:checked + .slider:before {
   outline: none;
 }
 
-/* Focus Session Modal */
+/* Focus Modal */
+.focus-icon-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+  color: var(--accent-amber);
+}
+
+.focus-icon-large svg {
+  width: 36px;
+  height: 36px;
+}
+
 .focus-duration-row {
   display: flex;
   justify-content: center;
@@ -1189,6 +1147,7 @@ input:checked + .slider:before {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
+  font-family: inherit;
 }
 
 .btn-duration.selected {
@@ -1197,7 +1156,7 @@ input:checked + .slider:before {
   border-color: var(--accent-amber);
 }
 
-/* Create Workspace Modal */
+/* Workspace Modal */
 .form-body {
   display: flex;
   flex-direction: column;
@@ -1217,6 +1176,7 @@ input:checked + .slider:before {
   color: var(--text-primary);
   padding: 8px 12px;
   font-size: 13px;
+  font-family: inherit;
   outline: none;
 }
 
@@ -1235,13 +1195,14 @@ input:checked + .slider:before {
   transition: transform 0.15s ease;
 }
 
-.color-choice:hover, .color-choice.selected {
+.color-choice:hover,
+.color-choice.selected {
   transform: scale(1.15);
   border-color: #fff;
 }
 
 .btn-primary {
-  background-color: var(--accent-coral);
+  background-color: var(--accent);
   color: #FFFFFF;
   border: none;
   border-radius: 6px;
@@ -1254,7 +1215,7 @@ input:checked + .slider:before {
 }
 
 .btn-primary:hover {
-  background-color: var(--accent-coral-hover);
+  background-color: var(--accent-hover);
 }
 
 .btn-secondary {
@@ -1267,4 +1228,15 @@ input:checked + .slider:before {
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
+}
+
+/* URL Badge */
+.url-badge {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(99, 102, 241, 0.12);
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
 }

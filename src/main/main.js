@@ -26,7 +26,7 @@ let focusManager = null;
 const tabViews = new Map();
 let splitRatio = 0.50; // Default 50/50 split
 
-const SIDEBAR_WIDTH = 58;
+const SIDEBAR_WIDTH = 54;
 const TOPBAR_HEIGHT = 82;
 
 const NEWTAB_FILE = path.join(__dirname, '../renderer/pages/newtab.html');
@@ -60,7 +60,7 @@ function createMainWindow() {
     minHeight: 600,
     frame: false, // Frameless custom chrome
     titleBarStyle: 'hidden',
-    backgroundColor: '#161822',
+    backgroundColor: '#0A0E1A',
     webPreferences: {
       preload: path.join(__dirname, '../preload/preload.js'),
       contextIsolation: true,

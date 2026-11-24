@@ -1,11 +1,10 @@
 /**
- * Controller for Vibez Browser Redesigned New Tab Dashboard.
- * Handles search queries, speed dial navigation & custom tiles,
- * category pill filtering for stories, and floating tools.
+ * Vibez Browser — New Tab Controller
+ * Search, speed dial, category filtering, greeting, shortcuts modal.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Populate SVG icons from icons.js
+  // Populate SVG icons
   function populateIcons() {
     if (typeof ICONS !== 'undefined') {
       document.querySelectorAll('[data-icon]').forEach(el => {
@@ -18,9 +17,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   populateIcons();
 
-  // Search capsule elements
+  // Dynamic Greeting
+  const greetingEl = document.getElementById('greeting-text');
+  if (greetingEl) {
+    const hour = new Date().getHours();
+    if (hour < 12) greetingEl.textContent = 'Good morning';
+    else if (hour < 17) greetingEl.textContent = 'Good afternoon';
+    else greetingEl.textContent = 'Good evening';
+  }
+
+  // Search
   const searchInput = document.getElementById('search-input');
-  const btnSearchAction = document.getElementById('btn-search-action');
   const btnCamera = document.getElementById('btn-camera');
   const btnMic = document.getElementById('btn-mic');
 
@@ -40,19 +47,12 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = targetUrl;
   }
 
-  // Submit on Enter
   searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       executeSearch(searchInput.value);
     }
   });
 
-  // Submit on Coral Pill click
-  btnSearchAction.addEventListener('click', () => {
-    executeSearch(searchInput.value);
-  });
-
-  // Camera & Mic tools
   btnCamera.addEventListener('click', () => {
     searchInput.placeholder = 'Paste image URL or search keywords...';
     searchInput.focus();
@@ -61,11 +61,11 @@ document.addEventListener('DOMContentLoaded', () => {
   btnMic.addEventListener('click', () => {
     searchInput.placeholder = 'Listening... Speak your search query';
     setTimeout(() => {
-      searchInput.placeholder = 'What are you looking for today?';
+      searchInput.placeholder = 'Search Google or type a URL';
     }, 3000);
   });
 
-  // Hotkey: pressing '/' immediately focuses search capsule
+  // Hotkey: "/" focuses search
   window.addEventListener('keydown', (e) => {
     if (e.key === '/' && document.activeElement !== searchInput) {
       e.preventDefault();
@@ -73,11 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --------------------------------------------------------------------------
-  // Category Pill Filter for Top Stories
-  // --------------------------------------------------------------------------
+  // Category Pill Filtering
   const categoryPills = document.querySelectorAll('.category-pill');
-  const storyCards = document.querySelectorAll('.story-card');
+  const storyCards = document.querySelectorAll('.discover-card');
 
   categoryPills.forEach(pill => {
     pill.addEventListener('click', () => {
@@ -97,17 +95,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Click on story cards to open articles
+  // Click story cards to search
   storyCards.forEach(card => {
     card.addEventListener('click', () => {
-      const title = card.querySelector('.story-title')?.textContent || 'news';
+      const title = card.querySelector('.card-title')?.textContent || 'news';
       executeSearch(title);
     });
   });
 
-  // --------------------------------------------------------------------------
-  // Speed Dial Custom Tile Modal (+ Add)
-  // --------------------------------------------------------------------------
+  // Add Tile Modal
   const btnAddTile = document.getElementById('btn-add-tile');
   const addTileModal = document.getElementById('add-tile-modal');
   const btnCloseTileModal = document.getElementById('btn-close-tile-modal');
@@ -142,32 +138,17 @@ document.addEventListener('DOMContentLoaded', () => {
       url = 'https://' + url;
     }
 
-    // Create new card element
     const newCard = document.createElement('a');
-    newCard.className = 'dial-card';
+    newCard.className = 'shortcut-tile';
     newCard.href = url;
     newCard.innerHTML = `
-      <div class="dial-icon-circle" style="background: #272C3B; color: #fff; font-weight: 700; font-size: 16px;">
+      <div class="tile-icon" style="background: #374151; color: #fff; font-weight: 700; font-size: 16px;">
         ${name.charAt(0).toUpperCase()}
       </div>
-      <span class="dial-label">${name}</span>
+      <span class="tile-name">${name}</span>
     `;
 
     speedDialGrid.insertBefore(newCard, btnAddTile);
     addTileModal.style.display = 'none';
-  });
-
-  // Floating Corner Buttons
-  const btnFloatingChat = document.getElementById('btn-floating-chat');
-  const btnFloatingCommunity = document.getElementById('btn-floating-community');
-
-  btnFloatingChat.addEventListener('click', () => {
-    // Notify parent frame or focus search
-    searchInput.focus();
-    searchInput.placeholder = 'Ask Vibez AI anything...';
-  });
-
-  btnFloatingCommunity.addEventListener('click', () => {
-    window.location.href = 'https://github.com/devFiend/VIBEZ_BROWSER';
   });
 });

@@ -6,37 +6,13 @@
   <title>Vibez Browser</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="app-container">
-    <!-- Left Navigation Rail (Floating App & Workspace Dock) -->
+    <!-- Left Sidebar Rail -->
     <aside id="sidebar">
-      <!-- App Badges Stack (Matches Reference Design) -->
-      <div class="dock-apps-list">
-        <button class="dock-app-btn brand-gmail" data-app="gmail" title="Gmail (mail.google.com)">
-          <span class="dock-svg-slot" data-icon="gmail"></span>
-        </button>
-        <button class="dock-app-btn brand-instagram" data-app="instagram" title="Instagram">
-          <span class="dock-svg-slot" data-icon="instagram"></span>
-        </button>
-        <button class="dock-app-btn brand-discord" data-app="discord" title="Discord">
-          <span class="dock-svg-slot" data-icon="discord"></span>
-        </button>
-        <button class="dock-app-btn brand-telegram" data-app="telegram" title="Telegram">
-          <span class="dock-svg-slot" data-icon="telegram"></span>
-        </button>
-        <button class="dock-app-btn brand-facebook" data-app="facebook" title="Facebook">
-          <span class="dock-svg-slot" data-icon="facebook"></span>
-        </button>
-        <button class="dock-app-btn brand-linkedin" data-app="linkedin" title="LinkedIn">
-          <span class="dock-svg-slot" data-icon="linkedin"></span>
-        </button>
-      </div>
-
-      <div class="rail-divider"></div>
-
       <!-- Workspaces List -->
       <nav id="workspaces-list" class="rail-nav">
         <!-- Rendered dynamically -->
@@ -52,13 +28,13 @@
       <button id="btn-ai-assistant" class="rail-btn icon-btn" title="AI Research Assistant (Ctrl+Shift+A)">
         <span class="btn-svg-slot" data-icon="ai"></span>
       </button>
-      <button id="btn-library" class="rail-btn icon-btn" title="Smart Library & Excerpts (Ctrl+Shift+L)">
+      <button id="btn-library" class="rail-btn icon-btn" title="Smart Library (Ctrl+Shift+L)">
         <span class="btn-svg-slot" data-icon="library"></span>
       </button>
       <button id="btn-automations" class="rail-btn icon-btn" title="Browser Automations (Ctrl+Shift+U)">
         <span class="btn-svg-slot" data-icon="automation"></span>
       </button>
-      <button id="btn-focus" class="rail-btn icon-btn" title="Focus Sessions & Pomodoro">
+      <button id="btn-focus" class="rail-btn icon-btn" title="Focus Sessions">
         <span class="btn-svg-slot" data-icon="focus"></span>
       </button>
 
@@ -74,11 +50,11 @@
       <button id="btn-command-center" class="rail-btn icon-btn" title="Command Center (Ctrl+K)">
         <span class="btn-svg-slot" data-icon="search"></span>
       </button>
-      <button id="btn-devtools" class="rail-btn icon-btn" title="Chromium Developer Tools">
+      <button id="btn-devtools" class="rail-btn icon-btn" title="Developer Tools">
         <span class="btn-svg-slot" data-icon="devtools"></span>
       </button>
 
-      <!-- Coral Red Circular Settings Gear Button (At Bottom) -->
+      <!-- Settings Button -->
       <button id="btn-settings-gear" class="dock-settings-btn" title="Browser Settings">
         <span class="btn-svg-slot" data-icon="settingsGear"></span>
       </button>
@@ -88,13 +64,6 @@
     <div id="main-content">
       <!-- Top Chrome Bar -->
       <header id="top-bar">
-        <!-- Traffic Light Window Controls (Left) -->
-        <div class="traffic-lights-group">
-          <button id="traffic-close" class="traffic-dot dot-close" title="Close Window"></button>
-          <button id="traffic-min" class="traffic-dot dot-min" title="Minimize Window"></button>
-          <button id="traffic-max" class="traffic-dot dot-max" title="Maximize Window"></button>
-        </div>
-
         <!-- Tab Strip Container -->
         <div id="tab-strip-container">
           <div id="tab-strip">
@@ -111,12 +80,12 @@
           <span id="focus-time-label">25:00</span>
         </div>
 
-        <!-- Automation Notification Toast -->
+        <!-- Automation Toast -->
         <div id="automation-toast" class="automation-toast" style="display: none;">
           <span id="automation-toast-text"></span>
         </div>
 
-        <!-- Standard Windows Controls (Top Right) -->
+        <!-- Windows Controls (Top Right) -->
         <div class="window-controls">
           <button id="win-min" class="win-btn" title="Minimize">
             <span class="btn-svg-slot" data-icon="windowMin"></span>
@@ -130,7 +99,7 @@
         </div>
       </header>
 
-      <!-- Glass Omnibox Bar -->
+      <!-- Omnibox Bar -->
       <div id="omnibox-bar">
         <!-- Navigation Controls -->
         <div class="nav-controls">
@@ -145,14 +114,9 @@
           </button>
         </div>
 
-        <!-- Main URL / Search Capsule (Pill Shaped) -->
+        <!-- URL Input Capsule -->
         <div class="url-input-container">
-          <span class="url-brand-orb">
-            <svg width="18" height="18" viewBox="0 0 100 100" fill="none">
-              <circle cx="50" cy="50" r="44" fill="#EB5757"/>
-              <path d="M24 55 C28 42, 68 40, 76 54 C72 63, 30 67, 24 55 Z" fill="#FFFFFF"/>
-            </svg>
-          </span>
+          <span class="url-lock-icon" data-icon="lock"></span>
           <input type="text" id="url-input" placeholder="Search or type a URL" spellcheck="false" autocomplete="off">
           <button id="btn-star-bookmark" class="omnibox-inner-btn" title="Bookmark this Tab">
             <span class="btn-svg-slot" data-icon="star"></span>
@@ -160,7 +124,7 @@
           <button id="btn-share-page" class="omnibox-inner-btn" title="Share Page">
             <span class="btn-svg-slot" data-icon="share"></span>
           </button>
-          <button id="btn-save-library" class="omnibox-inner-btn" title="Save page to Smart Library">
+          <button id="btn-save-library" class="omnibox-inner-btn" title="Save to Library">
             <span class="btn-svg-slot" data-icon="bookmark"></span>
           </button>
         </div>
@@ -171,46 +135,45 @@
           <input type="text" id="split-url-input" placeholder="Pane 2 URL..." spellcheck="false" autocomplete="off">
         </div>
 
-        <!-- Right Toolbar Stack (Matches Reference Design) -->
+        <!-- Right Toolbar -->
         <div class="toolbar-actions-group">
-          <!-- Privacy Shield Indicator Button -->
-          <button id="btn-shield" class="toolbar-btn shield-btn" title="Privacy Shield Controls">
+          <!-- Privacy Shield -->
+          <button id="btn-shield" class="toolbar-btn shield-btn" title="Privacy Shield">
             <span class="btn-svg-slot" data-icon="shield"></span>
             <span id="shield-count-badge" class="shield-badge">0</span>
           </button>
 
-          <!-- Wallet / Rewards / Tools -->
-          <button id="btn-wallet" class="toolbar-btn" title="Web3 & Identity Wallet">
+          <button id="btn-wallet" class="toolbar-btn" title="Identity Wallet">
             <span class="btn-svg-slot" data-icon="wallet"></span>
           </button>
-          <button id="btn-rewards" class="toolbar-btn" title="Vibez Rewards & Offers">
+          <button id="btn-rewards" class="toolbar-btn" title="Vibez Rewards">
             <span class="btn-svg-slot" data-icon="gift"></span>
           </button>
-          <button id="btn-apps-grid" class="toolbar-btn" title="Browser Apps Grid">
+          <button id="btn-apps-grid" class="toolbar-btn" title="Apps Grid">
             <span class="btn-svg-slot" data-icon="appsGrid"></span>
           </button>
 
-          <!-- User Profile Avatar Pill -->
+          <!-- User Profile Avatar -->
           <div class="user-avatar-pill" id="btn-user-profile" title="devFiend Profile">
             <div class="avatar-ring">
               <div class="avatar-img-badge">DF</div>
             </div>
           </div>
 
-          <!-- More Options Menu (3-dots) -->
+          <!-- More Options -->
           <button id="btn-more-options" class="toolbar-btn" title="Customize and control Vibez">
             <span class="btn-svg-slot" data-icon="dotsVertical"></span>
           </button>
         </div>
       </div>
 
-      <!-- Draggable Split View Divider -->
+      <!-- Draggable Split Divider -->
       <div id="split-divider" style="display: none;">
         <div class="divider-handle"></div>
       </div>
     </div>
 
-    <!-- V2 Right Slide-out Drawer: AI Research Assistant -->
+    <!-- AI Research Assistant Drawer -->
     <aside id="ai-drawer" class="side-drawer" style="display: none;">
       <div class="drawer-header">
         <div class="drawer-title">
@@ -222,8 +185,8 @@
         </button>
       </div>
       <div class="drawer-actions-bar">
-        <button id="btn-ai-summarize" class="drawer-pill-btn active">📑 Summarize Page</button>
-        <button id="btn-ai-compare" class="drawer-pill-btn">⚖️ Compare Tabs</button>
+        <button id="btn-ai-summarize" class="drawer-pill-btn active">Summarize Page</button>
+        <button id="btn-ai-compare" class="drawer-pill-btn">Compare Tabs</button>
       </div>
       <div id="ai-content-area" class="drawer-content">
         <div class="ai-welcome-box">
@@ -237,19 +200,19 @@
       </div>
     </aside>
 
-    <!-- V2 Right Slide-out Drawer: Smart Library 2.0 -->
+    <!-- Smart Library Drawer -->
     <aside id="library-drawer" class="side-drawer" style="display: none;">
       <div class="drawer-header">
         <div class="drawer-title">
           <span class="btn-svg-slot" data-icon="library"></span>
-          <h3>Smart Library & Excerpts</h3>
+          <h3>Smart Library</h3>
         </div>
         <button id="btn-close-library" class="btn-close-modal">
           <span class="btn-svg-slot" data-icon="close"></span>
         </button>
       </div>
       <div class="drawer-search-bar">
-        <input type="text" id="library-search-input" placeholder="Search saved excerpts & notes...">
+        <input type="text" id="library-search-input" placeholder="Search saved excerpts...">
       </div>
       <div id="library-items-container" class="drawer-content">
         <!-- Rendered dynamically -->
@@ -257,7 +220,7 @@
     </aside>
   </div>
 
-  <!-- Privacy Shield Popup Modal -->
+  <!-- Privacy Shield Modal -->
   <div id="shield-modal" class="modal-backdrop" style="display: none;">
     <div class="modal-card shield-card">
       <div class="modal-header">
@@ -285,9 +248,9 @@
           <span class="stat-label">Trackers & Ads Neutralized on this Site</span>
         </div>
         <div class="shield-features-list">
-          <div class="feature-item">✔ Cross-site cookie tracking dropped</div>
-          <div class="feature-item">✔ Fingerprinting beacons intercepted</div>
-          <div class="feature-item">✔ Crypto-mining scripts blocked</div>
+          <div class="feature-item">Cross-site cookie tracking dropped</div>
+          <div class="feature-item">Fingerprinting beacons intercepted</div>
+          <div class="feature-item">Crypto-mining scripts blocked</div>
         </div>
       </div>
     </div>
@@ -298,8 +261,8 @@
     <div class="modal-card command-card">
       <div class="command-search-header">
         <span class="command-search-icon btn-svg-slot" data-icon="search"></span>
-        <input type="text" id="command-search-input" placeholder="Search open tabs, bookmarks, or browser commands..." autocomplete="off">
-        <span class="command-hint">ESC to exit</span>
+        <input type="text" id="command-search-input" placeholder="Search open tabs, bookmarks, or commands..." autocomplete="off">
+        <span class="command-hint">ESC</span>
       </div>
       <div id="command-results" class="command-results-list">
         <!-- Rendered dynamically -->
@@ -307,27 +270,26 @@
     </div>
   </div>
 
-  <!-- Automations Rule Engine Modal (Ctrl+Shift+U) -->
+  <!-- Automations Modal -->
   <div id="automations-modal" class="modal-backdrop" style="display: none;">
     <div class="modal-card" style="width: 520px;">
       <div class="modal-header">
-        <h3>Browser Automations Engine</h3>
+        <h3>Browser Automations</h3>
         <button id="btn-close-rules" class="btn-close-modal">
           <span class="btn-svg-slot" data-icon="close"></span>
         </button>
       </div>
       <div class="modal-body">
-        <p class="sub-label">Automatically route domains, mute tabs, and organize your workspaces.</p>
+        <p class="sub-label">Route domains, mute tabs, and organize workspaces automatically.</p>
         <div id="rules-list-container" class="rules-list">
           <!-- Rendered dynamically -->
         </div>
-
         <div class="new-rule-section">
-          <h4>Add New Routing Rule</h4>
+          <h4>Add Routing Rule</h4>
           <input type="text" id="rule-name-input" placeholder="Rule Name (e.g. Work PRs)" style="margin-bottom: 8px;">
           <input type="text" id="rule-pattern-input" placeholder="Domain Pattern (e.g. jira.com|confluence)" style="margin-bottom: 8px;">
           <select id="rule-ws-select" style="margin-bottom: 12px;"></select>
-          <button id="btn-save-new-rule" class="btn-primary">Add Automation Rule</button>
+          <button id="btn-save-new-rule" class="btn-primary">Add Rule</button>
         </div>
       </div>
     </div>
@@ -343,8 +305,10 @@
         </button>
       </div>
       <div class="modal-body" style="text-align: center;">
-        <span style="font-size: 36px; display: block; margin-bottom: 8px;">⏱️</span>
-        <p class="sub-label">Block social media distractions and enter deep work mode.</p>
+        <div class="focus-icon-wrap">
+          <span class="btn-svg-slot focus-icon-large" data-icon="focus"></span>
+        </div>
+        <p class="sub-label">Block distractions and enter deep work mode.</p>
         <div class="focus-duration-row">
           <button class="btn-duration selected" data-minutes="25">25 Min</button>
           <button class="btn-duration" data-minutes="45">45 Min</button>
@@ -369,14 +333,14 @@
         <label for="ws-name-input">Workspace Name</label>
         <input type="text" id="ws-name-input" placeholder="e.g. Design, Client Project..." maxlength="24">
 
-        <label for="ws-icon-input">Icon (Emoji / Letter)</label>
-        <input type="text" id="ws-icon-input" value="🚀" maxlength="2">
+        <label for="ws-icon-input">Icon (Letter)</label>
+        <input type="text" id="ws-icon-input" value="W" maxlength="2">
 
         <label>Accent Color</label>
         <div class="color-picker-row">
-          <button class="color-choice" data-color="#EB5757" style="background: #EB5757;"></button>
+          <button class="color-choice" data-color="#6366F1" style="background: #6366F1;"></button>
           <button class="color-choice" data-color="#3B82F6" style="background: #3B82F6;"></button>
-          <button class="color-choice" data-color="#10B981" style="background: #10B981;"></button>
+          <button class="color-choice" data-color="#06D6A0" style="background: #06D6A0;"></button>
           <button class="color-choice" data-color="#8B5CF6" style="background: #8B5CF6;"></button>
           <button class="color-choice" data-color="#F59E0B" style="background: #F59E0B;"></button>
         </div>
