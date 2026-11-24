@@ -51,8 +51,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnSubmitCreateWs = document.getElementById('btn-submit-create-ws');
   let selectedWsColor = '#3B82F6';
 
-  // Window Controls
-  document.getElementById('win-min').addEventListener('click', () => window.vibezApi.minimizeWindow());
+  // Populate all SVG icons across the shell chrome
+  function initIcons() {
+    if (typeof ICONS !== 'undefined') {
+      document.querySelectorAll('.btn-svg-slot').forEach(slot => {
+        const iconName = slot.dataset.icon;
+        if (ICONS[iconName]) {
+          slot.innerHTML = ICONS[iconName];
+        }
+      });
+    }
+  }
+  initIcons();
   document.getElementById('win-max').addEventListener('click', () => window.vibezApi.maximizeWindow());
   document.getElementById('win-close').addEventListener('click', () => window.vibezApi.closeWindow());
 
@@ -123,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const closeBtn = document.createElement('span');
       closeBtn.className = 'tab-close';
-      closeBtn.textContent = '✕';
+      closeBtn.innerHTML = typeof ICONS !== 'undefined' ? ICONS.close : '✕';
       closeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         window.vibezApi.closeTab(tab.id);
@@ -141,18 +151,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update Omnibox inputs
     if (currentActiveTab && document.activeElement !== urlInput) {
-      urlInput.value = currentActiveTab.url || '';
+      if (!currentActiveTab.url || currentActiveTab.url === 'vibez://newtab' || currentActiveTab.url.includes('newtab.html')) {
+        urlInput.value = '';
+        urlInput.placeholder = 'Search with Google or enter web address...';
+      } else {
+        urlInput.value = currentActiveTab.url;
+      }
     }
     if (currentSplitTab && document.activeElement !== splitUrlInput) {
-      splitUrlInput.value = currentSplitTab.url || '';
+      if (!currentSplitTab.url || currentSplitTab.url === 'vibez://newtab' || currentSplitTab.url.includes('newtab.html')) {
+        splitUrlInput.value = '';
+        splitUrlInput.placeholder = 'Pane 2 URL...';
+      } else {
+        splitUrlInput.value = currentSplitTab.url;
+      }
     }
   }
 
   function updateNavigationControls() {
     if (currentActiveTab) {
-      btnBack.style.opacity = currentActiveTab.canGoBack ? '1' : '0.4';
-      btnForward.style.opacity = currentActiveTab.canGoForward ? '1' : '0.4';
-      btnReload.textContent = currentActiveTab.isLoading ? '✕' : '↻';
+      btnBack.style.opacity = currentActiveTab.canGoBack ? '1' : '0.35';
+      btnForward.style.opacity = currentActiveTab.canGoForward ? '1' : '0.35';
+      if (typeof ICONS !== 'undefined') {
+        btnReload.innerHTML = currentActiveTab.isLoading ? ICONS.stop : ICONS.reload;
+      }
     }
   }
 
@@ -184,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   btnNewTab.addEventListener('click', () => {
-    window.vibezApi.createTab('https://www.google.com');
+    window.vibezApi.createTab('vibez://newtab');
   });
 
   // --------------------------------------------------------------------------

@@ -29,6 +29,16 @@ let splitRatio = 0.50; // Default 50/50 split
 const SIDEBAR_WIDTH = 58;
 const TOPBAR_HEIGHT = 82;
 
+const NEWTAB_FILE = path.join(__dirname, '../renderer/pages/newtab.html');
+const NEWTAB_URL = `file://${NEWTAB_FILE.replace(/\\/g, '/')}`;
+
+function resolveInternalUrl(url) {
+  if (!url || url === 'vibez://newtab' || url === 'about:blank') {
+    return NEWTAB_URL;
+  }
+  return url;
+}
+
 function initializeStoresAndServices() {
   store = new LocalStore('vibez_data');
   shield = new PrivacyShield(store);
@@ -91,7 +101,7 @@ function getOrCreateTabView(tab) {
     }
   });
 
-  view.webContents.loadURL(tab.url || 'https://www.google.com');
+  view.webContents.loadURL(resolveInternalUrl(tab.url));
 
   // Track tab events
   view.webContents.on('did-start-loading', () => {
@@ -100,8 +110,12 @@ function getOrCreateTabView(tab) {
   });
 
   view.webContents.on('did-finish-load', () => {
-    const url = view.webContents.getURL();
-    const title = view.webContents.getTitle() || 'New Tab';
+    let url = view.webContents.getURL();
+    let title = view.webContents.getTitle() || 'New Tab';
+    if (url.includes('newtab.html') || url.startsWith('file://')) {
+      url = 'vibez://newtab';
+      title = 'New Tab';
+    }
     const navHistory = view.webContents.navigationHistory;
     const canGoBack = navHistory ? navHistory.canGoBack() : view.webContents.canGoBack();
     const canGoForward = navHistory ? navHistory.canGoForward() : view.webContents.canGoForward();
@@ -278,8 +292,10 @@ function setupIpcHandlers() {
     const targetTab = isSplit ? workspaceManager.getSplitTab() : workspaceManager.getActiveTab();
     if (!targetTab) return;
 
-    let targetUrl = url.trim();
-    if (!/^https?:\/\//i.test(targetUrl)) {
+    let targetUrl = (url || '').trim();
+    if (!targetUrl || targetUrl === 'vibez://newtab') {
+      targetUrl = NEWTAB_URL;
+    } else if (!/^https?:\/\//i.test(targetUrl) && !targetUrl.startsWith('file://')) {
       if (targetUrl.includes('.') && !targetUrl.includes(' ')) {
         targetUrl = 'https://' + targetUrl;
       } else {
@@ -294,7 +310,7 @@ function setupIpcHandlers() {
 
     const view = getOrCreateTabView(targetTab);
     view.webContents.loadURL(targetUrl);
-    workspaceManager.updateTab(targetTab.id, { url: targetUrl });
+    workspaceManager.updateTab(targetTab.id, { url: targetUrl.startsWith('file://') ? 'vibez://newtab' : targetUrl });
     syncStateToRenderer();
   });
 
@@ -338,7 +354,7 @@ function setupIpcHandlers() {
 
   // Tabs
   ipcMain.on('tab-create', (_event, { url }) => {
-    const newTab = workspaceManager.createTab(url || 'https://www.google.com', true);
+    const newTab = workspaceManager.createTab(url || 'vibez://newtab', true);
     getOrCreateTabView(newTab);
     updateViewports();
     syncStateToRenderer();

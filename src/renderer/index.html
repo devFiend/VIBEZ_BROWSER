@@ -4,57 +4,60 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vibez Browser</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="app-container">
-    <!-- Left Navigation Rail (Workspaces & Global Tools) -->
+    <!-- Left Navigation Rail (Workspaces Dock) -->
     <aside id="sidebar">
       <div class="logo-area" title="Vibez Browser">
-        <span class="logo-icon">⚡</span>
+        <span class="logo-mark">⚡</span>
       </div>
 
       <div class="rail-divider"></div>
 
       <!-- Workspaces List -->
       <nav id="workspaces-list" class="rail-nav">
-        <!-- Rendered dynamically by app.js -->
+        <!-- Rendered dynamically -->
       </nav>
 
-      <button id="btn-add-workspace" class="rail-btn" title="Create New Workspace">
-        <span>➕</span>
+      <button id="btn-add-workspace" class="rail-btn icon-btn" title="Create New Workspace">
+        <span class="btn-svg-slot" data-icon="plus"></span>
       </button>
 
       <div class="rail-spacer"></div>
 
       <!-- V2 Signature Tools -->
-      <button id="btn-ai-assistant" class="rail-btn" title="AI Research Assistant (Ctrl+Shift+A)">
-        <span>🤖</span>
+      <button id="btn-ai-assistant" class="rail-btn icon-btn" title="AI Research Assistant (Ctrl+Shift+A)">
+        <span class="btn-svg-slot" data-icon="ai"></span>
       </button>
-      <button id="btn-library" class="rail-btn" title="Smart Library & Notes (Ctrl+Shift+L)">
-        <span>📚</span>
+      <button id="btn-library" class="rail-btn icon-btn" title="Smart Library & Excerpts (Ctrl+Shift+L)">
+        <span class="btn-svg-slot" data-icon="library"></span>
       </button>
-      <button id="btn-automations" class="rail-btn" title="Browser Automations (Ctrl+Shift+U)">
-        <span>⚡</span>
+      <button id="btn-automations" class="rail-btn icon-btn" title="Browser Automations (Ctrl+Shift+U)">
+        <span class="btn-svg-slot" data-icon="automation"></span>
       </button>
-      <button id="btn-focus" class="rail-btn" title="Focus Sessions & Pomodoro">
-        <span>⏱️</span>
+      <button id="btn-focus" class="rail-btn icon-btn" title="Focus Sessions & Pomodoro">
+        <span class="btn-svg-slot" data-icon="focus"></span>
       </button>
 
       <div class="rail-divider"></div>
 
-      <!-- Window / View Tools -->
-      <button id="btn-toggle-split" class="rail-btn" title="Toggle Split View (Ctrl+\)">
-        <span>🔲</span>
+      <!-- Viewport & Window Tools -->
+      <button id="btn-toggle-split" class="rail-btn icon-btn" title="Toggle Split View (Ctrl+\)">
+        <span class="btn-svg-slot" data-icon="split"></span>
       </button>
-      <button id="btn-swap-split" class="rail-btn" title="Swap Split Panes" style="display: none;">
-        <span>⇄</span>
+      <button id="btn-swap-split" class="rail-btn icon-btn" title="Swap Split Panes" style="display: none;">
+        <span class="btn-svg-slot" data-icon="swap"></span>
       </button>
-      <button id="btn-command-center" class="rail-btn" title="Command Center (Ctrl+K)">
-        <span>🔍</span>
+      <button id="btn-command-center" class="rail-btn icon-btn" title="Command Center (Ctrl+K)">
+        <span class="btn-svg-slot" data-icon="search"></span>
       </button>
-      <button id="btn-devtools" class="rail-btn" title="Chromium Developer Tools">
-        <span>🛠️</span>
+      <button id="btn-devtools" class="rail-btn icon-btn" title="Chromium Developer Tools">
+        <span class="btn-svg-slot" data-icon="devtools"></span>
       </button>
     </aside>
 
@@ -62,19 +65,27 @@
     <div id="main-content">
       <!-- Top Chrome Bar -->
       <header id="top-bar">
-        <!-- Window Drag Region & Navigation Controls -->
+        <!-- Navigation Controls -->
         <div class="nav-controls">
-          <button id="btn-back" class="nav-btn" title="Back (Alt+Left)">‹</button>
-          <button id="btn-forward" class="nav-btn" title="Forward (Alt+Right)">›</button>
-          <button id="btn-reload" class="nav-btn" title="Reload (Ctrl+R)">↻</button>
+          <button id="btn-back" class="nav-btn icon-btn" title="Back (Alt+Left)">
+            <span class="btn-svg-slot" data-icon="back"></span>
+          </button>
+          <button id="btn-forward" class="nav-btn icon-btn" title="Forward (Alt+Right)">
+            <span class="btn-svg-slot" data-icon="forward"></span>
+          </button>
+          <button id="btn-reload" class="nav-btn icon-btn" title="Reload (Ctrl+R)">
+            <span class="btn-svg-slot" data-icon="reload"></span>
+          </button>
         </div>
 
-        <!-- Tab Strip -->
+        <!-- Floating Tab Strip -->
         <div id="tab-strip-container">
           <div id="tab-strip">
             <!-- Tabs rendered dynamically -->
           </div>
-          <button id="btn-new-tab" class="tab-btn-add" title="New Tab (Ctrl+T)">+</button>
+          <button id="btn-new-tab" class="tab-btn-add icon-btn" title="New Tab (Ctrl+T)">
+            <span class="btn-svg-slot" data-icon="plus"></span>
+          </button>
         </div>
 
         <!-- Focus Timer Indicator Pill -->
@@ -88,30 +99,38 @@
           <span id="automation-toast-text"></span>
         </div>
 
-        <!-- Window Minimize, Maximize, Close Buttons -->
+        <!-- Fluent Windows 11 Controls -->
         <div class="window-controls">
-          <button id="win-min" class="win-btn" title="Minimize">−</button>
-          <button id="win-max" class="win-btn" title="Maximize">□</button>
-          <button id="win-close" class="win-btn close" title="Close">✕</button>
+          <button id="win-min" class="win-btn" title="Minimize">
+            <span class="btn-svg-slot" data-icon="windowMin"></span>
+          </button>
+          <button id="win-max" class="win-btn" title="Maximize">
+            <span class="btn-svg-slot" data-icon="windowMax"></span>
+          </button>
+          <button id="win-close" class="win-btn close" title="Close">
+            <span class="btn-svg-slot" data-icon="windowClose"></span>
+          </button>
         </div>
       </header>
 
-      <!-- Omnibox (Address & Search Bar) -->
+      <!-- Glass Omnibox Bar -->
       <div id="omnibox-bar">
         <!-- Privacy Shield Indicator Button -->
         <button id="btn-shield" class="shield-btn" title="Privacy Shield Controls">
-          <span class="shield-icon">🛡️</span>
+          <span class="btn-svg-slot" data-icon="shield"></span>
           <span id="shield-count-badge" class="shield-badge">0</span>
         </button>
 
-        <!-- Main URL / Search Input -->
+        <!-- Main URL / Search Capsule -->
         <div class="url-input-container">
-          <span class="url-lock-icon">🔒</span>
-          <input type="text" id="url-input" placeholder="Search with Google or enter address..." spellcheck="false" autocomplete="off">
-          <button id="btn-save-library" class="omnibox-action-btn" title="Save page to Smart Library">🔖</button>
+          <span class="url-lock-icon btn-svg-slot" data-icon="lock"></span>
+          <input type="text" id="url-input" placeholder="Search with Google or enter web address..." spellcheck="false" autocomplete="off">
+          <button id="btn-save-library" class="omnibox-action-btn icon-btn" title="Save page to Smart Library">
+            <span class="btn-svg-slot" data-icon="bookmark"></span>
+          </button>
         </div>
 
-        <!-- Split View Secondary Omnibox (visible only in split mode) -->
+        <!-- Split View Secondary Omnibox -->
         <div id="split-url-container" class="url-input-container split-omnibox" style="display: none;">
           <span class="url-badge">PANE 2</span>
           <input type="text" id="split-url-input" placeholder="Pane 2 URL..." spellcheck="false" autocomplete="off">
@@ -128,10 +147,12 @@
     <aside id="ai-drawer" class="side-drawer" style="display: none;">
       <div class="drawer-header">
         <div class="drawer-title">
-          <span>🤖</span>
+          <span class="btn-svg-slot" data-icon="ai"></span>
           <h3>AI Research Assistant</h3>
         </div>
-        <button id="btn-close-ai" class="btn-close-modal">✕</button>
+        <button id="btn-close-ai" class="btn-close-modal">
+          <span class="btn-svg-slot" data-icon="close"></span>
+        </button>
       </div>
       <div class="drawer-actions-bar">
         <button id="btn-ai-summarize" class="drawer-pill-btn active">📑 Summarize Page</button>
@@ -153,10 +174,12 @@
     <aside id="library-drawer" class="side-drawer" style="display: none;">
       <div class="drawer-header">
         <div class="drawer-title">
-          <span>📚</span>
+          <span class="btn-svg-slot" data-icon="library"></span>
           <h3>Smart Library & Excerpts</h3>
         </div>
-        <button id="btn-close-library" class="btn-close-modal">✕</button>
+        <button id="btn-close-library" class="btn-close-modal">
+          <span class="btn-svg-slot" data-icon="close"></span>
+        </button>
       </div>
       <div class="drawer-search-bar">
         <input type="text" id="library-search-input" placeholder="Search saved excerpts & notes...">
@@ -172,13 +195,15 @@
     <div class="modal-card shield-card">
       <div class="modal-header">
         <div class="shield-title">
-          <span class="shield-icon-large">🛡️</span>
+          <span class="shield-icon-large btn-svg-slot" data-icon="shield"></span>
           <div>
             <h3>Privacy Shield</h3>
             <span id="shield-domain-label" class="sub-label">example.com</span>
           </div>
         </div>
-        <button id="btn-close-shield" class="btn-close-modal">✕</button>
+        <button id="btn-close-shield" class="btn-close-modal">
+          <span class="btn-svg-slot" data-icon="close"></span>
+        </button>
       </div>
       <div class="modal-body">
         <div class="shield-toggle-row">
@@ -190,12 +215,12 @@
         </div>
         <div class="shield-stats-card">
           <span id="shield-stat-blocked" class="stat-number">0</span>
-          <span class="stat-label">Trackers & Ads Blocked on this Page</span>
+          <span class="stat-label">Trackers & Ads Neutralized on this Site</span>
         </div>
         <div class="shield-features-list">
-          <div class="feature-item">✔ Cross-site cookie tracking blocked</div>
-          <div class="feature-item">✔ Fingerprinting scripts intercepted</div>
-          <div class="feature-item">✔ Crypto-mining scripts neutralized</div>
+          <div class="feature-item">✔ Cross-site cookie tracking dropped</div>
+          <div class="feature-item">✔ Fingerprinting beacons intercepted</div>
+          <div class="feature-item">✔ Crypto-mining scripts blocked</div>
         </div>
       </div>
     </div>
@@ -205,7 +230,7 @@
   <div id="command-modal" class="modal-backdrop" style="display: none;">
     <div class="modal-card command-card">
       <div class="command-search-header">
-        <span class="command-search-icon">🔍</span>
+        <span class="command-search-icon btn-svg-slot" data-icon="search"></span>
         <input type="text" id="command-search-input" placeholder="Search open tabs, bookmarks, or browser commands..." autocomplete="off">
         <span class="command-hint">ESC to exit</span>
       </div>
@@ -220,7 +245,9 @@
     <div class="modal-card" style="width: 520px;">
       <div class="modal-header">
         <h3>Browser Automations Engine</h3>
-        <button id="btn-close-rules" class="btn-close-modal">✕</button>
+        <button id="btn-close-rules" class="btn-close-modal">
+          <span class="btn-svg-slot" data-icon="close"></span>
+        </button>
       </div>
       <div class="modal-body">
         <p class="sub-label">Automatically route domains, mute tabs, and organize your workspaces.</p>
@@ -244,7 +271,9 @@
     <div class="modal-card" style="width: 380px;">
       <div class="modal-header">
         <h3>Focus Session</h3>
-        <button id="btn-close-focus" class="btn-close-modal">✕</button>
+        <button id="btn-close-focus" class="btn-close-modal">
+          <span class="btn-svg-slot" data-icon="close"></span>
+        </button>
       </div>
       <div class="modal-body" style="text-align: center;">
         <span style="font-size: 36px; display: block; margin-bottom: 8px;">⏱️</span>
@@ -265,13 +294,15 @@
     <div class="modal-card">
       <div class="modal-header">
         <h3>Create Workspace</h3>
-        <button id="btn-close-ws-modal" class="btn-close-modal">✕</button>
+        <button id="btn-close-ws-modal" class="btn-close-modal">
+          <span class="btn-svg-slot" data-icon="close"></span>
+        </button>
       </div>
       <div class="modal-body form-body">
         <label for="ws-name-input">Workspace Name</label>
         <input type="text" id="ws-name-input" placeholder="e.g. Design, Client Project..." maxlength="24">
 
-        <label for="ws-icon-input">Icon (Emoji)</label>
+        <label for="ws-icon-input">Icon (Emoji / Letter)</label>
         <input type="text" id="ws-icon-input" value="🚀" maxlength="2">
 
         <label>Accent Color</label>
@@ -288,6 +319,7 @@
     </div>
   </div>
 
+  <script src="icons.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
