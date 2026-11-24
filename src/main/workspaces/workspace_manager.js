@@ -11,6 +11,7 @@ class WorkspaceManager {
     this.store = store;
     this.workspaces = [];
     this.activeWorkspaceId = null;
+    this.closedTabs = [];
 
     this._load();
   }
@@ -208,6 +209,16 @@ class WorkspaceManager {
     const index = ws.tabs.findIndex(t => t.id === tabId);
     if (index === -1) return null;
 
+    const targetTab = ws.tabs[index];
+    if (targetTab.url && !targetTab.url.startsWith('vibez://newtab')) {
+      this.closedTabs.push({
+        url: targetTab.url,
+        title: targetTab.title,
+        workspaceId: ws.id
+      });
+      if (this.closedTabs.length > 50) this.closedTabs.shift();
+    }
+
     if (ws.splitTabId === tabId) {
       ws.splitTabId = null;
     }
@@ -282,6 +293,71 @@ class WorkspaceManager {
       ws.splitTabId = currentActive.id;
       this.save();
     }
+  }
+
+  togglePinTab(tabId) {
+    const ws = this.getActiveWorkspace();
+    const tab = ws.tabs.find(t => t.id === tabId);
+    if (!tab) return null;
+
+    tab.isPinned = !tab.isPinned;
+    // Re-sort: pinned tabs first, preserving relative order
+    ws.tabs.sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0));
+    ws.activeTabIndex = ws.tabs.findIndex(t => t.id === tab.id);
+    this.save();
+    return tab;
+  }
+
+  duplicateTab(tabId) {
+    const ws = this.getActiveWorkspace();
+    const tab = ws.tabs.find(t => t.id === tabId);
+    if (!tab) return null;
+
+    return this.createTab(tab.url, true);
+  }
+
+  reorderTabs(fromIndex, toIndex) {
+    const ws = this.getActiveWorkspace();
+    if (fromIndex < 0 || fromIndex >= ws.tabs.length || toIndex < 0 || toIndex >= ws.tabs.length) {
+      return false;
+    }
+
+    const currentActiveTab = ws.tabs[ws.activeTabIndex];
+    const [moved] = ws.tabs.splice(fromIndex, 1);
+    ws.tabs.splice(toIndex, 0, moved);
+    ws.activeTabIndex = ws.tabs.indexOf(currentActiveTab);
+    this.save();
+    return true;
+  }
+
+  reopenClosedTab() {
+    if (this.closedTabs.length === 0) return null;
+    const lastClosed = this.closedTabs.pop();
+    if (lastClosed.workspaceId) {
+      this.setActiveWorkspace(lastClosed.workspaceId);
+    }
+    return this.createTab(lastClosed.url, true);
+  }
+
+  closeOtherTabs(tabId) {
+    const ws = this.getActiveWorkspace();
+    const keepTabs = ws.tabs.filter(t => t.id === tabId || t.isPinned);
+    ws.tabs = keepTabs;
+    ws.activeTabIndex = ws.tabs.findIndex(t => t.id === tabId);
+    this.save();
+    return ws.tabs;
+  }
+
+  closeTabsToRight(tabId) {
+    const ws = this.getActiveWorkspace();
+    const index = ws.tabs.findIndex(t => t.id === tabId);
+    if (index === -1) return ws.tabs;
+
+    const keepTabs = ws.tabs.filter((t, i) => i <= index || t.isPinned);
+    ws.tabs = keepTabs;
+    ws.activeTabIndex = Math.min(ws.activeTabIndex, ws.tabs.length - 1);
+    this.save();
+    return ws.tabs;
   }
 
   updateTab(tabId, updates) {

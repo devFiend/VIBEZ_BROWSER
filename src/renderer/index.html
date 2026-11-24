@@ -105,6 +105,11 @@
               <span class="btn-svg-slot" data-icon="bookmark"></span>
             </button>
           </div>
+
+          <!-- Omnibox Autocomplete & Suggestions Dropdown -->
+          <div id="omnibox-suggestions" class="omnibox-dropdown" style="display: none;">
+            <!-- Dynamically populated -->
+          </div>
         </div>
 
         <!-- Split View Secondary Omnibox (Dual pane) -->
@@ -115,6 +120,23 @@
 
         <!-- Toolbar Extension & Action Buttons -->
         <div class="toolbar-actions-group">
+          <!-- Downloads Button & Flyout -->
+          <div class="downloads-container">
+            <button id="btn-downloads" class="fx-tool-btn" title="Downloads">
+              <span class="btn-svg-slot" data-icon="download"></span>
+              <span id="downloads-badge" class="badge-dot" style="display: none;"></span>
+            </button>
+            <div id="downloads-dropdown" class="fx-dropdown downloads-dropdown" style="display: none;">
+              <div class="fx-dropdown-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>Downloads</span>
+                <button id="btn-clear-downloads" class="btn-text-action">Clear</button>
+              </div>
+              <div id="downloads-list" class="fx-dropdown-list downloads-list">
+                <div class="downloads-empty">No downloads yet</div>
+              </div>
+            </div>
+          </div>
+
           <!-- DuckDuckGo Fire Button (Burn data / close tabs) -->
           <button id="btn-fire" class="fx-tool-btn fire-btn" title="Fire Button: Burn session and clear tab">
             <span class="btn-svg-slot" data-icon="fire"></span>
@@ -183,8 +205,30 @@
       </div>
     </header>
 
+    <!-- Page Load Progress Bar -->
+    <div id="load-progress-bar"></div>
+
     <!-- Main Viewport Area -->
     <main id="main-viewport">
+      <!-- Find in Page Floating Bar (Ctrl+F) -->
+      <div id="find-box" class="find-box" style="display: none;">
+        <span class="find-search-icon btn-svg-slot" data-icon="search"></span>
+        <input type="text" id="find-input" placeholder="Find in page..." autocomplete="off" spellcheck="false">
+        <span id="find-count" class="find-count">0/0</span>
+        <button id="btn-find-prev" class="find-btn" title="Previous match (Shift+Enter)">
+          <span class="btn-svg-slot" data-icon="chevronUp"></span>
+        </button>
+        <button id="btn-find-next" class="find-btn" title="Next match (Enter)">
+          <span class="btn-svg-slot" data-icon="chevronDown"></span>
+        </button>
+        <button id="btn-find-close" class="find-btn close-find" title="Close (Escape)">
+          <span class="btn-svg-slot" data-icon="close"></span>
+        </button>
+      </div>
+
+      <!-- Floating Zoom Level Indicator Badge -->
+      <div id="zoom-badge" class="zoom-badge" style="display: none;">100%</div>
+
       <!-- Draggable Split View Divider -->
       <div id="split-divider" style="display: none;">
         <div class="divider-handle"></div>

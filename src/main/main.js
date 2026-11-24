@@ -3,8 +3,9 @@
  * High-performance Chromium desktop browser shell for Windows.
  */
 
-const { app, BrowserWindow, WebContentsView, ipcMain, session } = require('electron');
+const { app, BrowserWindow, WebContentsView, ipcMain, session, Menu, MenuItem, shell } = require('electron');
 const path = require('path');
+const crypto = require('crypto');
 const { LocalStore } = require('./storage/store');
 const { PrivacyShield } = require('./privacy/shield');
 const { WorkspaceManager } = require('./workspaces/workspace_manager');
@@ -66,6 +67,46 @@ function initializeStoresAndServices() {
 
   // Attach privacy shield to default network session
   shield.attachToSession(session.defaultSession);
+
+  // Setup Downloads Manager on default session
+  session.defaultSession.on('will-download', (_event, item) => {
+    const downloadId = crypto.randomUUID();
+    const filename = item.getFilename();
+    const totalBytes = item.getTotalBytes();
+
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('download-progress', {
+        id: downloadId,
+        filename,
+        receivedBytes: 0,
+        totalBytes,
+        state: 'progressing'
+      });
+    }
+
+    item.on('updated', (_event, state) => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('download-progress', {
+          id: downloadId,
+          filename,
+          receivedBytes: item.getReceivedBytes(),
+          totalBytes: item.getTotalBytes(),
+          state
+        });
+      }
+    });
+
+    item.once('done', (_event, state) => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('download-complete', {
+          id: downloadId,
+          filename,
+          savePath: item.getSavePath(),
+          state
+        });
+      }
+    });
+  });
 }
 
 function createMainWindow() {
@@ -199,6 +240,130 @@ function getOrCreateTabView(tab) {
       workspaceManager.updateTab(tab.id, { favicon: favicons[0] });
       syncStateToRenderer();
     }
+  });
+
+  // Media state listeners
+  view.webContents.on('media-started-playing', () => {
+    workspaceManager.updateTab(tab.id, { isAudioPlaying: true });
+    syncStateToRenderer();
+  });
+  view.webContents.on('media-paused', () => {
+    workspaceManager.updateTab(tab.id, { isAudioPlaying: false });
+    syncStateToRenderer();
+  });
+
+  // Find in page listener
+  view.webContents.on('found-in-page', (_event, result) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('found-in-page-result', {
+        activeMatchOrdinal: result.activeMatchOrdinal,
+        matches: result.matches,
+        finalUpdate: result.finalUpdate
+      });
+    }
+  });
+
+  // Native Right-Click Context Menu
+  view.webContents.on('context-menu', (_event, params) => {
+    const menuTemplate = [];
+
+    if (params.linkURL) {
+      menuTemplate.push(
+        {
+          label: 'Open Link in New Tab',
+          click: () => {
+            const newTab = workspaceManager.createTab(params.linkURL, true);
+            getOrCreateTabView(newTab);
+            renderActiveWorkspaceTabs();
+            syncStateToRenderer();
+          }
+        },
+        {
+          label: 'Open Link in Split View',
+          click: () => {
+            const newTab = workspaceManager.createTab(params.linkURL, false);
+            workspaceManager.toggleSplitView(newTab.id);
+            renderActiveWorkspaceTabs();
+            syncStateToRenderer();
+          }
+        },
+        {
+          label: 'Copy Link Address',
+          click: () => {
+            const { clipboard } = require('electron');
+            clipboard.writeText(params.linkURL);
+          }
+        },
+        { type: 'separator' }
+      );
+    }
+
+    if (params.hasImageContents && params.srcURL) {
+      menuTemplate.push(
+        {
+          label: 'Open Image in New Tab',
+          click: () => {
+            const newTab = workspaceManager.createTab(params.srcURL, true);
+            getOrCreateTabView(newTab);
+            renderActiveWorkspaceTabs();
+            syncStateToRenderer();
+          }
+        },
+        {
+          label: 'Copy Image Address',
+          click: () => {
+            const { clipboard } = require('electron');
+            clipboard.writeText(params.srcURL);
+          }
+        },
+        { type: 'separator' }
+      );
+    }
+
+    if (params.selectionText) {
+      menuTemplate.push(
+        { label: 'Copy', role: 'copy' },
+        {
+          label: `Search Google for "${params.selectionText.slice(0, 20)}${params.selectionText.length > 20 ? '...' : ''}"`,
+          click: () => {
+            const searchUrl = settingsManager.getSearchUrl(params.selectionText);
+            const newTab = workspaceManager.createTab(searchUrl, true);
+            getOrCreateTabView(newTab);
+            renderActiveWorkspaceTabs();
+            syncStateToRenderer();
+          }
+        },
+        { type: 'separator' }
+      );
+    }
+
+    if (params.isEditable) {
+      menuTemplate.push(
+        { label: 'Undo', role: 'undo' },
+        { label: 'Redo', role: 'redo' },
+        { type: 'separator' },
+        { label: 'Cut', role: 'cut' },
+        { label: 'Copy', role: 'copy' },
+        { label: 'Paste', role: 'paste' },
+        { label: 'Select All', role: 'selectAll' },
+        { type: 'separator' }
+      );
+    }
+
+    const navHistory = view.webContents.navigationHistory;
+    const canBack = navHistory ? navHistory.canGoBack() : view.webContents.canGoBack();
+    const canFwd = navHistory ? navHistory.canGoForward() : view.webContents.canGoForward();
+
+    menuTemplate.push(
+      { label: 'Back', enabled: canBack, click: () => view.webContents.goBack() },
+      { label: 'Forward', enabled: canFwd, click: () => view.webContents.goForward() },
+      { label: 'Reload', click: () => view.webContents.reload() },
+      { type: 'separator' },
+      { label: 'Inspect Element', click: () => view.webContents.inspectElement(params.x, params.y) }
+    );
+
+    const contextMenu = Menu.buildFromTemplate(menuTemplate);
+    contextMenu.popup({ window: mainWindow });
   });
 
   tabViews.set(tab.id, view);
@@ -626,6 +791,232 @@ function setupIpcHandlers() {
   // Settings Manager
   ipcMain.handle('settings-get', () => settingsManager.getSettings());
   ipcMain.handle('settings-update', (_event, newSettings) => settingsManager.updateSettings(newSettings));
+
+  // Tab Ergonomics IPC Handlers
+  ipcMain.on('tab-toggle-pin', (_event, { tabId }) => {
+    workspaceManager.togglePinTab(tabId);
+    renderActiveWorkspaceTabs();
+    syncStateToRenderer();
+  });
+
+  ipcMain.on('tab-duplicate', (_event, { tabId }) => {
+    const newTab = workspaceManager.duplicateTab(tabId);
+    if (newTab) {
+      getOrCreateTabView(newTab);
+      renderActiveWorkspaceTabs();
+      syncStateToRenderer();
+    }
+  });
+
+  ipcMain.on('tab-toggle-mute', (_event, { tabId }) => {
+    if (tabViews.has(tabId)) {
+      const wc = tabViews.get(tabId).webContents;
+      const isMuted = wc.isAudioMuted();
+      wc.setAudioMuted(!isMuted);
+      workspaceManager.updateTab(tabId, { isMuted: !isMuted });
+      syncStateToRenderer();
+    }
+  });
+
+  ipcMain.on('tab-reorder', (_event, { fromIndex, toIndex }) => {
+    workspaceManager.reorderTabs(fromIndex, toIndex);
+    renderActiveWorkspaceTabs();
+    syncStateToRenderer();
+  });
+
+  ipcMain.on('tab-reopen-closed', () => {
+    const reopened = workspaceManager.reopenClosedTab();
+    if (reopened) {
+      getOrCreateTabView(reopened);
+      renderActiveWorkspaceTabs();
+      syncStateToRenderer();
+    }
+  });
+
+  ipcMain.on('tab-close-others', (_event, { tabId }) => {
+    workspaceManager.closeOtherTabs(tabId);
+    renderActiveWorkspaceTabs();
+    syncStateToRenderer();
+  });
+
+  ipcMain.on('tab-close-to-right', (_event, { tabId }) => {
+    workspaceManager.closeTabsToRight(tabId);
+    renderActiveWorkspaceTabs();
+    syncStateToRenderer();
+  });
+
+  ipcMain.on('tab-context-menu', (_event, { tabId }) => {
+    const ws = workspaceManager.getActiveWorkspace();
+    const tab = ws.tabs.find(t => t.id === tabId);
+    if (!tab) return;
+
+    const tabMenu = Menu.buildFromTemplate([
+      {
+        label: tab.isPinned ? 'Unpin Tab' : 'Pin Tab',
+        click: () => {
+          workspaceManager.togglePinTab(tabId);
+          renderActiveWorkspaceTabs();
+          syncStateToRenderer();
+        }
+      },
+      {
+        label: 'Duplicate',
+        click: () => {
+          const newTab = workspaceManager.duplicateTab(tabId);
+          if (newTab) {
+            getOrCreateTabView(newTab);
+            renderActiveWorkspaceTabs();
+            syncStateToRenderer();
+          }
+        }
+      },
+      {
+        label: tab.isMuted ? 'Unmute Tab' : 'Mute Tab',
+        click: () => {
+          if (tabViews.has(tabId)) {
+            const wc = tabViews.get(tabId).webContents;
+            const isMuted = wc.isAudioMuted();
+            wc.setAudioMuted(!isMuted);
+            workspaceManager.updateTab(tabId, { isMuted: !isMuted });
+            syncStateToRenderer();
+          }
+        }
+      },
+      { type: 'separator' },
+      {
+        label: 'Close Other Tabs',
+        click: () => {
+          workspaceManager.closeOtherTabs(tabId);
+          renderActiveWorkspaceTabs();
+          syncStateToRenderer();
+        }
+      },
+      {
+        label: 'Close Tabs to the Right',
+        click: () => {
+          workspaceManager.closeTabsToRight(tabId);
+          renderActiveWorkspaceTabs();
+          syncStateToRenderer();
+        }
+      },
+      {
+        label: 'Reopen Closed Tab',
+        accelerator: 'Ctrl+Shift+T',
+        enabled: workspaceManager.closedTabs.length > 0,
+        click: () => {
+          const reopened = workspaceManager.reopenClosedTab();
+          if (reopened) {
+            getOrCreateTabView(reopened);
+            renderActiveWorkspaceTabs();
+            syncStateToRenderer();
+          }
+        }
+      },
+      { type: 'separator' },
+      {
+        label: 'Close Tab',
+        click: () => {
+          workspaceManager.closeTab(tabId);
+          renderActiveWorkspaceTabs();
+          syncStateToRenderer();
+        }
+      }
+    ]);
+
+    tabMenu.popup({ window: mainWindow });
+  });
+
+  // Find in Page
+  ipcMain.on('find-in-page', (_event, { text, forward = true, findNext = false }) => {
+    const tab = workspaceManager.getActiveTab();
+    if (tab && tabViews.has(tab.id) && text) {
+      tabViews.get(tab.id).webContents.findInPage(text, { forward, findNext });
+    }
+  });
+
+  ipcMain.on('stop-find-in-page', (_event, { action = 'clearSelection' }) => {
+    const tab = workspaceManager.getActiveTab();
+    if (tab && tabViews.has(tab.id)) {
+      tabViews.get(tab.id).webContents.stopFindInPage(action);
+    }
+  });
+
+  // Page Zoom
+  ipcMain.on('zoom-in', () => {
+    const tab = workspaceManager.getActiveTab();
+    if (tab && tabViews.has(tab.id)) {
+      const wc = tabViews.get(tab.id).webContents;
+      const current = wc.getZoomLevel();
+      const next = Math.min(3.0, current + 0.5);
+      wc.setZoomLevel(next);
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('zoom-changed', { level: Math.round(Math.pow(1.2, next) * 100) });
+      }
+    }
+  });
+
+  ipcMain.on('zoom-out', () => {
+    const tab = workspaceManager.getActiveTab();
+    if (tab && tabViews.has(tab.id)) {
+      const wc = tabViews.get(tab.id).webContents;
+      const current = wc.getZoomLevel();
+      const next = Math.max(-2.0, current - 0.5);
+      wc.setZoomLevel(next);
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('zoom-changed', { level: Math.round(Math.pow(1.2, next) * 100) });
+      }
+    }
+  });
+
+  ipcMain.on('zoom-reset', () => {
+    const tab = workspaceManager.getActiveTab();
+    if (tab && tabViews.has(tab.id)) {
+      const wc = tabViews.get(tab.id).webContents;
+      wc.setZoomLevel(0);
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('zoom-changed', { level: 100 });
+      }
+    }
+  });
+
+  // Omnibox Live Suggestions
+  ipcMain.handle('omnibox-suggest', async (_event, { query }) => {
+    const q = (query || '').trim();
+    if (!q) return { history: [], suggestions: [] };
+
+    const historyMatches = historyManager.search(q).slice(0, 4);
+    let webSuggestions = [];
+    try {
+      const https = require('https');
+      webSuggestions = await new Promise((resolve) => {
+        const req = https.get(`https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(q)}`, (res) => {
+          let data = '';
+          res.on('data', chunk => { data += chunk; });
+          res.on('end', () => {
+            try {
+              const parsed = JSON.parse(data);
+              resolve(Array.isArray(parsed[1]) ? parsed[1].slice(0, 5) : []);
+            } catch (_) {
+              resolve([]);
+            }
+          });
+        });
+        req.on('error', () => resolve([]));
+        req.setTimeout(1500, () => { req.destroy(); resolve([]); });
+      });
+    } catch (_) {}
+
+    return { history: historyMatches, suggestions: webSuggestions };
+  });
+
+  // Open / Show in folder for downloads
+  ipcMain.on('open-path', (_event, { filePath }) => {
+    if (filePath) shell.openPath(filePath);
+  });
+
+  ipcMain.on('show-item-in-folder', (_event, { filePath }) => {
+    if (filePath) shell.showItemInFolder(filePath);
+  });
 }
 
 app.whenReady().then(() => {

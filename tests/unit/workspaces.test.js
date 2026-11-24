@@ -61,3 +61,35 @@ test('WorkspaceManager split view toggle and pane swapping', () => {
   manager.toggleSplitView();
   assert.equal(manager.getActiveWorkspace().splitTabId, null);
 });
+
+test('WorkspaceManager tab pinning, reordering, duplicate, and reopen closed tab', () => {
+  const store = new MockStore();
+  const manager = new WorkspaceManager(store);
+
+  const t1 = manager.createTab('https://a.com', true);
+  const t2 = manager.createTab('https://b.com', true);
+
+  // Pin t2
+  const pinned = manager.togglePinTab(t2.id);
+  assert.equal(pinned.isPinned, true);
+  // Pinned tabs are placed at index 0
+  const ws = manager.getActiveWorkspace();
+  assert.equal(ws.tabs[0].id, t2.id);
+
+  // Duplicate t1
+  const dup = manager.duplicateTab(t1.id);
+  assert.ok(dup);
+  assert.equal(dup.url, 'https://a.com');
+
+  // Reorder
+  const initialFirst = ws.tabs[0].id;
+  manager.reorderTabs(0, 1);
+  assert.notEqual(ws.tabs[0].id, initialFirst);
+
+  // Close and Reopen
+  const toClose = manager.createTab('https://recoverable.org', true);
+  manager.closeTab(toClose.id);
+  const reopened = manager.reopenClosedTab();
+  assert.ok(reopened);
+  assert.equal(reopened.url, 'https://recoverable.org');
+});

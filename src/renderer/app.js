@@ -146,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('click', () => {
     if (workspaceDropdown) workspaceDropdown.style.display = 'none';
     if (browserMenuDropdown) browserMenuDropdown.style.display = 'none';
+    if (downloadsDropdown) downloadsDropdown.style.display = 'none';
   });
 
   // Menu items click events
@@ -200,6 +201,23 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTabs();
     updateNavigationControls();
     updateSplitViewUI();
+
+    // Page Load Progress Bar Animation
+    const loadProgressBar = document.getElementById('load-progress-bar');
+    if (loadProgressBar && currentActiveTab) {
+      if (currentActiveTab.isLoading) {
+        loadProgressBar.classList.add('loading');
+        loadProgressBar.style.width = '70%';
+      } else {
+        loadProgressBar.style.width = '100%';
+        setTimeout(() => {
+          if (loadProgressBar && (!currentActiveTab || !currentActiveTab.isLoading)) {
+            loadProgressBar.classList.remove('loading');
+            loadProgressBar.style.width = '0%';
+          }
+        }, 220);
+      }
+    }
   });
 
   window.vibezApi.onShieldUpdate((data) => {
@@ -241,28 +259,58 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
-  // Tab Strip Rendering (Proton Floating Tabs)
+  // Tab Strip Rendering (Proton Floating Tabs + Daily Driver Ergonomics)
   // --------------------------------------------------------------------------
   function renderTabs() {
     const activeWs = currentWorkspaces.find(w => w.id === currentActiveWsId);
     if (!activeWs) return;
 
     tabStrip.innerHTML = '';
-    activeWs.tabs.forEach((tab) => {
+    activeWs.tabs.forEach((tab, index) => {
       const tabEl = document.createElement('div');
       const isActive = currentActiveTab && currentActiveTab.id === tab.id;
       const isSplit = currentSplitTab && currentSplitTab.id === tab.id;
+      const isPinned = !!tab.isPinned;
 
-      tabEl.className = `tab-item ${isActive ? 'active' : ''} ${isSplit ? 'split-active' : ''}`;
-      tabEl.title = tab.title || tab.url;
+      tabEl.className = `tab-item ${isActive ? 'active' : ''} ${isSplit ? 'split-active' : ''} ${isPinned ? 'pinned' : ''}`;
+      tabEl.title = tab.title || tab.url || 'Tab';
+      tabEl.dataset.tabId = tab.id;
+      tabEl.dataset.tabIndex = index;
+      tabEl.setAttribute('draggable', 'true');
 
+      // Dot / Pin indicator
       const dotSpan = document.createElement('span');
       dotSpan.className = 'tab-icon-dot';
+      if (isPinned && typeof ICONS !== 'undefined' && ICONS.pin) {
+        dotSpan.innerHTML = ICONS.pin;
+        dotSpan.style.background = 'none';
+        dotSpan.style.display = 'flex';
+        dotSpan.style.alignItems = 'center';
+        dotSpan.style.justifyContent = 'center';
+        dotSpan.style.color = isActive ? 'var(--fx-blue)' : 'var(--fx-text-muted)';
+      }
 
+      // Tab Title
       const titleSpan = document.createElement('span');
       titleSpan.className = 'tab-title';
       titleSpan.textContent = tab.isLoading ? 'Loading...' : (tab.title || 'New Tab');
 
+      // Audio / Mute Indicator
+      let audioBtn = null;
+      if (tab.isAudible || tab.isMuted) {
+        audioBtn = document.createElement('span');
+        audioBtn.className = `tab-audio-btn ${tab.isMuted ? 'muted' : ''}`;
+        audioBtn.title = tab.isMuted ? 'Unmute tab' : 'Mute tab';
+        audioBtn.innerHTML = typeof ICONS !== 'undefined'
+          ? (tab.isMuted ? ICONS.volumeMute : ICONS.volume)
+          : (tab.isMuted ? 'M' : 'S');
+        audioBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          window.vibezApi.toggleMuteTab(tab.id);
+        });
+      }
+
+      // Close Button
       const closeBtn = document.createElement('span');
       closeBtn.className = 'tab-close';
       closeBtn.innerHTML = typeof ICONS !== 'undefined' ? ICONS.close : '×';
@@ -273,10 +321,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
       tabEl.appendChild(dotSpan);
       tabEl.appendChild(titleSpan);
-      tabEl.appendChild(closeBtn);
+      if (audioBtn) tabEl.appendChild(audioBtn);
+      if (!isPinned) tabEl.appendChild(closeBtn);
 
+      // Tab Switch
       tabEl.addEventListener('click', () => {
         window.vibezApi.switchTab(tab.id);
+      });
+
+      // Middle-click to close (non-pinned tabs)
+      tabEl.addEventListener('auxclick', (e) => {
+        if (e.button === 1 && !isPinned) {
+          e.preventDefault();
+          e.stopPropagation();
+          window.vibezApi.closeTab(tab.id);
+        }
+      });
+
+      // Right-click Context Menu
+      tabEl.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.vibezApi.showTabContextMenu(tab.id);
+      });
+
+      // HTML5 Drag and Drop Reordering
+      tabEl.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', String(index));
+        e.dataTransfer.effectAllowed = 'move';
+        tabEl.classList.add('dragging');
+      });
+
+      tabEl.addEventListener('dragend', () => {
+        tabEl.classList.remove('dragging');
+        document.querySelectorAll('.tab-item').forEach(el => {
+          el.classList.remove('drag-over-left', 'drag-over-right');
+        });
+      });
+
+      tabEl.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const rect = tabEl.getBoundingClientRect();
+        const midPoint = rect.left + rect.width / 2;
+        if (e.clientX < midPoint) {
+          tabEl.classList.add('drag-over-left');
+          tabEl.classList.remove('drag-over-right');
+        } else {
+          tabEl.classList.add('drag-over-right');
+          tabEl.classList.remove('drag-over-left');
+        }
+      });
+
+      tabEl.addEventListener('dragleave', () => {
+        tabEl.classList.remove('drag-over-left', 'drag-over-right');
+      });
+
+      tabEl.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const fromIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        const rect = tabEl.getBoundingClientRect();
+        const midPoint = rect.left + rect.width / 2;
+        let toIdx = index;
+        if (e.clientX >= midPoint && fromIdx < index) {
+          toIdx = index;
+        } else if (e.clientX >= midPoint && fromIdx > index) {
+          toIdx = index + 1;
+        } else if (e.clientX < midPoint && fromIdx > index) {
+          toIdx = index;
+        } else if (e.clientX < midPoint && fromIdx < index) {
+          toIdx = Math.max(0, index - 1);
+        }
+        tabEl.classList.remove('drag-over-left', 'drag-over-right');
+        if (!isNaN(fromIdx) && fromIdx !== toIdx) {
+          window.vibezApi.reorderTabs(fromIdx, toIdx);
+        }
       });
 
       tabStrip.appendChild(tabEl);
@@ -312,10 +431,158 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
+  // Omnibox Live Suggestions & Autocomplete
+  // --------------------------------------------------------------------------
+  const omniboxSuggestions = document.getElementById('omnibox-suggestions');
+  let omniboxItems = [];
+  let selectedOmniboxIdx = -1;
+  let omniboxDebounceTimer = null;
+
+  async function fetchOmniboxSuggestions(query) {
+    const q = (query || '').trim();
+    if (!q || q.startsWith('vibez://') || q.startsWith('file://')) {
+      hideOmniboxSuggestions();
+      return;
+    }
+
+    try {
+      const res = await window.vibezApi.getOmniboxSuggestions(q);
+      const historyMatches = (res && res.history) || [];
+      const webSuggestions = (res && res.suggestions) || [];
+
+      omniboxItems = [];
+      historyMatches.forEach(h => {
+        omniboxItems.push({
+          type: 'history',
+          title: h.title || h.url,
+          url: h.url,
+          displayUrl: h.url.replace(/^https?:\/\//, '')
+        });
+      });
+
+      webSuggestions.forEach(s => {
+        if (!omniboxItems.some(i => i.title.toLowerCase() === s.toLowerCase())) {
+          omniboxItems.push({
+            type: 'search',
+            title: s,
+            url: `https://www.google.com/search?q=${encodeURIComponent(s)}`,
+            displayUrl: 'Google Search'
+          });
+        }
+      });
+
+      renderOmniboxSuggestions();
+    } catch (_) {
+      hideOmniboxSuggestions();
+    }
+  }
+
+  function renderOmniboxSuggestions() {
+    if (!omniboxSuggestions) return;
+    if (omniboxItems.length === 0) {
+      hideOmniboxSuggestions();
+      return;
+    }
+
+    omniboxSuggestions.innerHTML = '';
+    selectedOmniboxIdx = -1;
+
+    omniboxItems.forEach((item) => {
+      const el = document.createElement('div');
+      el.className = 'omnibox-item';
+      const iconSvg = item.type === 'history'
+        ? (typeof ICONS !== 'undefined' ? ICONS.clock : '')
+        : (typeof ICONS !== 'undefined' ? ICONS.search : '');
+
+      el.innerHTML = `
+        <span class="omnibox-item-icon">${iconSvg}</span>
+        <div class="omnibox-item-content">
+          <span class="omnibox-item-title">${item.title}</span>
+          <span class="omnibox-item-url">${item.displayUrl}</span>
+        </div>
+        <span class="omnibox-item-type">${item.type}</span>
+      `;
+
+      el.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        navigateOmniboxItem(item);
+      });
+
+      omniboxSuggestions.appendChild(el);
+    });
+
+    omniboxSuggestions.style.display = 'flex';
+  }
+
+  function hideOmniboxSuggestions() {
+    if (omniboxSuggestions) {
+      omniboxSuggestions.style.display = 'none';
+      omniboxSuggestions.innerHTML = '';
+    }
+    omniboxItems = [];
+    selectedOmniboxIdx = -1;
+  }
+
+  function updateSelectedOmniboxItem() {
+    if (!omniboxSuggestions) return;
+    const items = omniboxSuggestions.querySelectorAll('.omnibox-item');
+    items.forEach((item, idx) => {
+      if (idx === selectedOmniboxIdx) {
+        item.classList.add('selected');
+        item.scrollIntoView({ block: 'nearest' });
+      } else {
+        item.classList.remove('selected');
+      }
+    });
+  }
+
+  function navigateOmniboxItem(item) {
+    hideOmniboxSuggestions();
+    urlInput.value = item.url;
+    window.vibezApi.navigate(item.url, false);
+    urlInput.blur();
+  }
+
+  urlInput.addEventListener('input', (e) => {
+    clearTimeout(omniboxDebounceTimer);
+    omniboxDebounceTimer = setTimeout(() => {
+      fetchOmniboxSuggestions(e.target.value);
+    }, 120);
+  });
+
+  urlInput.addEventListener('blur', () => {
+    setTimeout(hideOmniboxSuggestions, 200);
+  });
+
+  // --------------------------------------------------------------------------
   // Navigation Events
   // --------------------------------------------------------------------------
   urlInput.addEventListener('keydown', (e) => {
+    if (omniboxItems.length > 0 && omniboxSuggestions.style.display !== 'none') {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedOmniboxIdx = (selectedOmniboxIdx + 1) % omniboxItems.length;
+        updateSelectedOmniboxItem();
+        return;
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedOmniboxIdx = (selectedOmniboxIdx - 1 + omniboxItems.length) % omniboxItems.length;
+        updateSelectedOmniboxItem();
+        return;
+      } else if (e.key === 'Escape') {
+        hideOmniboxSuggestions();
+        return;
+      } else if (e.key === 'Enter') {
+        if (selectedOmniboxIdx >= 0 && omniboxItems[selectedOmniboxIdx]) {
+          e.preventDefault();
+          navigateOmniboxItem(omniboxItems[selectedOmniboxIdx]);
+          return;
+        }
+      }
+    }
+
     if (e.key === 'Enter') {
+      hideOmniboxSuggestions();
       window.vibezApi.navigate(urlInput.value, false);
       urlInput.blur();
     }
@@ -862,9 +1129,226 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --------------------------------------------------------------------------
+  // Find in Page (Ctrl+F)
+  // --------------------------------------------------------------------------
+  const findBox = document.getElementById('find-box');
+  const findInput = document.getElementById('find-input');
+  const findCount = document.getElementById('find-count');
+  const btnFindPrev = document.getElementById('btn-find-prev');
+  const btnFindNext = document.getElementById('btn-find-next');
+  const btnFindClose = document.getElementById('btn-find-close');
+
+  function openFindBox() {
+    if (!findBox) return;
+    findBox.style.display = 'flex';
+    findInput.focus();
+    findInput.select();
+    if (findInput.value.trim()) {
+      window.vibezApi.findInPage(findInput.value.trim(), true, false);
+    }
+  }
+
+  function closeFindBox() {
+    if (!findBox) return;
+    findBox.style.display = 'none';
+    window.vibezApi.stopFindInPage('clearSelection');
+  }
+
+  if (btnFindClose) btnFindClose.addEventListener('click', closeFindBox);
+
+  if (findInput) {
+    let findTimer = null;
+    findInput.addEventListener('input', () => {
+      clearTimeout(findTimer);
+      findTimer = setTimeout(() => {
+        const text = findInput.value.trim();
+        if (text) {
+          window.vibezApi.findInPage(text, true, false);
+        } else {
+          if (findCount) findCount.textContent = '0/0';
+          window.vibezApi.stopFindInPage('clearSelection');
+        }
+      }, 100);
+    });
+
+    findInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const text = findInput.value.trim();
+        if (text) {
+          window.vibezApi.findInPage(text, !e.shiftKey, true);
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeFindBox();
+      }
+    });
+  }
+
+  if (btnFindNext) {
+    btnFindNext.addEventListener('click', () => {
+      const text = findInput.value.trim();
+      if (text) window.vibezApi.findInPage(text, true, true);
+    });
+  }
+
+  if (btnFindPrev) {
+    btnFindPrev.addEventListener('click', () => {
+      const text = findInput.value.trim();
+      if (text) window.vibezApi.findInPage(text, false, true);
+    });
+  }
+
+  window.vibezApi.onFoundInPageResult((result) => {
+    if (!findCount) return;
+    const { activeMatchOrdinal, matches } = result;
+    findCount.textContent = matches > 0 ? `${activeMatchOrdinal}/${matches}` : '0/0';
+  });
+
+  // --------------------------------------------------------------------------
+  // Downloads Manager & Flyout
+  // --------------------------------------------------------------------------
+  const btnDownloads = document.getElementById('btn-downloads');
+  const downloadsDropdown = document.getElementById('downloads-dropdown');
+  const downloadsList = document.getElementById('downloads-list');
+  const downloadsBadge = document.getElementById('downloads-badge');
+  const btnClearDownloads = document.getElementById('btn-clear-downloads');
+
+  const downloadsMap = new Map();
+
+  if (btnDownloads && downloadsDropdown) {
+    btnDownloads.addEventListener('click', (e) => {
+      e.stopPropagation();
+      downloadsDropdown.style.display = downloadsDropdown.style.display === 'flex' ? 'none' : 'flex';
+      if (workspaceDropdown) workspaceDropdown.style.display = 'none';
+      if (browserMenuDropdown) browserMenuDropdown.style.display = 'none';
+      if (downloadsBadge) downloadsBadge.style.display = 'none';
+    });
+  }
+
+  if (btnClearDownloads) {
+    btnClearDownloads.addEventListener('click', () => {
+      downloadsMap.clear();
+      renderDownloads();
+    });
+  }
+
+  function formatBytes(bytes) {
+    if (!bytes || bytes <= 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  }
+
+  function renderDownloads() {
+    if (!downloadsList) return;
+    downloadsList.innerHTML = '';
+    if (downloadsMap.size === 0) {
+      downloadsList.innerHTML = '<div class="downloads-empty">No downloads yet</div>';
+      return;
+    }
+
+    downloadsMap.forEach((dl) => {
+      const item = document.createElement('div');
+      item.className = 'download-item';
+      const isDone = dl.state === 'completed';
+      const isFailed = dl.state === 'cancelled' || dl.state === 'interrupted';
+
+      item.innerHTML = `
+        <div class="download-item-header">
+          <span class="download-filename" title="${dl.filename}">${dl.filename}</span>
+          <span class="download-status-badge">${isDone ? 'Completed' : (isFailed ? 'Failed' : `${dl.percent}%`)}</span>
+        </div>
+        <div class="download-progress-track">
+          <div class="download-progress-fill" style="width: ${isDone ? '100%' : (isFailed ? '0%' : `${dl.percent}%`)}; ${isFailed ? 'background: var(--fx-red);' : ''}"></div>
+        </div>
+        ${isDone && dl.savePath ? `
+          <div class="download-item-actions">
+            <button class="btn-download-action btn-open-file">Open</button>
+            <button class="btn-download-action btn-show-folder">Show in folder</button>
+          </div>
+        ` : `
+          <div style="font-size: 10px; color: var(--fx-text-muted);">${formatBytes(dl.receivedBytes)} / ${formatBytes(dl.totalBytes)}</div>
+        `}
+      `;
+
+      const btnOpen = item.querySelector('.btn-open-file');
+      if (btnOpen) {
+        btnOpen.addEventListener('click', () => {
+          window.vibezApi.openPath(dl.savePath);
+        });
+      }
+
+      const btnFolder = item.querySelector('.btn-show-folder');
+      if (btnFolder) {
+        btnFolder.addEventListener('click', () => {
+          window.vibezApi.showItemInFolder(dl.savePath);
+        });
+      }
+
+      downloadsList.appendChild(item);
+    });
+  }
+
+  window.vibezApi.onDownloadProgress((data) => {
+    downloadsMap.set(data.id, data);
+    if (downloadsBadge) downloadsBadge.style.display = 'block';
+    renderDownloads();
+  });
+
+  window.vibezApi.onDownloadComplete((data) => {
+    const existing = downloadsMap.get(data.id) || {};
+    downloadsMap.set(data.id, { ...existing, ...data });
+    renderDownloads();
+    showShellToast(`Download complete: ${data.filename}`);
+  });
+
+  // --------------------------------------------------------------------------
+  // Page Zoom Controls & Toast
+  // --------------------------------------------------------------------------
+  const zoomBadge = document.getElementById('zoom-badge');
+  let zoomBadgeTimer = null;
+
+  window.vibezApi.onZoomChanged((data) => {
+    if (!zoomBadge) return;
+    zoomBadge.textContent = `${data.level}%`;
+    zoomBadge.style.display = 'block';
+    zoomBadge.style.opacity = '1';
+    clearTimeout(zoomBadgeTimer);
+    zoomBadgeTimer = setTimeout(() => {
+      zoomBadge.style.opacity = '0';
+      setTimeout(() => { zoomBadge.style.display = 'none'; }, 300);
+    }, 1200);
+  });
+
+  // --------------------------------------------------------------------------
   // Global Keyboard Shortcuts
   // --------------------------------------------------------------------------
   window.addEventListener('keydown', (e) => {
+    // Find in Page (Ctrl+F)
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'f') {
+      e.preventDefault();
+      openFindBox();
+    }
+    // Reopen Closed Tab (Ctrl+Shift+T)
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 't') {
+      e.preventDefault();
+      window.vibezApi.reopenClosedTab();
+    }
+    // Page Zoom Controls
+    if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) {
+      e.preventDefault();
+      window.vibezApi.zoomIn();
+    }
+    if ((e.ctrlKey || e.metaKey) && (e.key === '-' || e.key === '_')) {
+      e.preventDefault();
+      window.vibezApi.zoomOut();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === '0') {
+      e.preventDefault();
+      window.vibezApi.zoomReset();
+    }
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'a') {
       e.preventDefault();
       toggleAiDrawer();
@@ -916,6 +1400,9 @@ document.addEventListener('DOMContentLoaded', () => {
       window.vibezApi.createTab('vibez://settings');
     }
     if (e.key === 'Escape') {
+      closeFindBox();
+      hideOmniboxSuggestions();
+      if (downloadsDropdown) downloadsDropdown.style.display = 'none';
       closeCommandCenter();
       shieldModal.style.display = 'none';
       workspaceModal.style.display = 'none';
