@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibez Browser</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app-container">
+    <!-- Left Navigation Rail (Workspaces & Global Tools) -->
+    <aside id="sidebar">
+      <div class="logo-area" title="Vibez Browser">
+        <span class="logo-icon">⚡</span>
+      </div>
+
+      <div class="rail-divider"></div>
+
+      <!-- Workspaces List -->
+      <nav id="workspaces-list" class="rail-nav">
+        <!-- Rendered dynamically by app.js -->
+      </nav>
+
+      <button id="btn-add-workspace" class="rail-btn" title="Create New Workspace">
+        <span>➕</span>
+      </button>
+
+      <div class="rail-spacer"></div>
+
+      <!-- Quick Action Tools -->
+      <button id="btn-toggle-split" class="rail-btn" title="Toggle Split View (Ctrl+\)">
+        <span>🔲</span>
+      </button>
+      <button id="btn-swap-split" class="rail-btn" title="Swap Split Panes" style="display: none;">
+        <span>⇄</span>
+      </button>
+      <button id="btn-command-center" class="rail-btn" title="Command Center (Ctrl+K)">
+        <span>🔍</span>
+      </button>
+      <button id="btn-devtools" class="rail-btn" title="Chromium Developer Tools">
+        <span>🛠️</span>
+      </button>
+    </aside>
+
+    <!-- Main Shell Area -->
+    <div id="main-content">
+      <!-- Top Chrome Bar -->
+      <header id="top-bar">
+        <!-- Window Drag Region & Navigation Controls -->
+        <div class="nav-controls">
+          <button id="btn-back" class="nav-btn" title="Back (Alt+Left)">‹</button>
+          <button id="btn-forward" class="nav-btn" title="Forward (Alt+Right)">›</button>
+          <button id="btn-reload" class="nav-btn" title="Reload (Ctrl+R)">↻</button>
+        </div>
+
+        <!-- Tab Strip -->
+        <div id="tab-strip-container">
+          <div id="tab-strip">
+            <!-- Tabs rendered dynamically -->
+          </div>
+          <button id="btn-new-tab" class="tab-btn-add" title="New Tab (Ctrl+T)">+</button>
+        </div>
+
+        <!-- Window Minimize, Maximize, Close Buttons -->
+        <div class="window-controls">
+          <button id="win-min" class="win-btn" title="Minimize">−</button>
+          <button id="win-max" class="win-btn" title="Maximize">□</button>
+          <button id="win-close" class="win-btn close" title="Close">✕</button>
+        </div>
+      </header>
+
+      <!-- Omnibox (Address & Search Bar) -->
+      <div id="omnibox-bar">
+        <!-- Privacy Shield Indicator Button -->
+        <button id="btn-shield" class="shield-btn" title="Privacy Shield Controls">
+          <span class="shield-icon">🛡️</span>
+          <span id="shield-count-badge" class="shield-badge">0</span>
+        </button>
+
+        <!-- Main URL / Search Input -->
+        <div class="url-input-container">
+          <span class="url-lock-icon">🔒</span>
+          <input type="text" id="url-input" placeholder="Search with DuckDuckGo or enter address..." spellcheck="false" autocomplete="off">
+        </div>
+
+        <!-- Split View Secondary Omnibox (visible only in split mode) -->
+        <div id="split-url-container" class="url-input-container split-omnibox" style="display: none;">
+          <span class="url-badge">PANE 2</span>
+          <input type="text" id="split-url-input" placeholder="Pane 2 URL..." spellcheck="false" autocomplete="off">
+        </div>
+      </div>
+
+      <!-- Draggable Split View Divider -->
+      <div id="split-divider" style="display: none;">
+        <div class="divider-handle"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy Shield Popup Modal -->
+  <div id="shield-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card shield-card">
+      <div class="modal-header">
+        <div class="shield-title">
+          <span class="shield-icon-large">🛡️</span>
+          <div>
+            <h3>Privacy Shield</h3>
+            <span id="shield-domain-label" class="sub-label">example.com</span>
+          </div>
+        </div>
+        <button id="btn-close-shield" class="btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="shield-toggle-row">
+          <span>Tracker & Ad Protection</span>
+          <label class="switch">
+            <input type="checkbox" id="shield-toggle-input" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
+        <div class="shield-stats-card">
+          <span id="shield-stat-blocked" class="stat-number">0</span>
+          <span class="stat-label">Trackers & Ads Blocked on this Page</span>
+        </div>
+        <div class="shield-features-list">
+          <div class="feature-item">✔ Cross-site cookie tracking blocked</div>
+          <div class="feature-item">✔ Fingerprinting scripts intercepted</div>
+          <div class="feature-item">✔ Crypto-mining scripts neutralized</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Command Center Modal (Ctrl+K) -->
+  <div id="command-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card command-card">
+      <div class="command-search-header">
+        <span class="command-search-icon">🔍</span>
+        <input type="text" id="command-search-input" placeholder="Search open tabs, bookmarks, or browser commands..." autocomplete="off">
+        <span class="command-hint">ESC to exit</span>
+      </div>
+      <div id="command-results" class="command-results-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Workspace Modal -->
+  <div id="workspace-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Create Workspace</h3>
+        <button id="btn-close-ws-modal" class="btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body form-body">
+        <label for="ws-name-input">Workspace Name</label>
+        <input type="text" id="ws-name-input" placeholder="e.g. Design, Client Project..." maxlength="24">
+
+        <label for="ws-icon-input">Icon (Emoji)</label>
+        <input type="text" id="ws-icon-input" value="🚀" maxlength="2">
+
+        <label>Accent Color</label>
+        <div class="color-picker-row">
+          <button class="color-choice" data-color="#3B82F6" style="background: #3B82F6;"></button>
+          <button class="color-choice" data-color="#10B981" style="background: #10B981;"></button>
+          <button class="color-choice" data-color="#8B5CF6" style="background: #8B5CF6;"></button>
+          <button class="color-choice" data-color="#F59E0B" style="background: #F59E0B;"></button>
+          <button class="color-choice" data-color="#EC4899" style="background: #EC4899;"></button>
+        </div>
+
+        <button id="btn-submit-create-ws" class="btn-primary">Create Workspace</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
