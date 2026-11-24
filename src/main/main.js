@@ -1,5 +1,5 @@
 /**
- * Vibez Browser — Main Process Entry Point
+ * Vibez Browser — Main Process Entry Point (V2 Architecture)
  * High-performance Chromium desktop browser shell for Windows.
  */
 
@@ -8,11 +8,19 @@ const path = require('path');
 const { LocalStore } = require('./storage/store');
 const { PrivacyShield } = require('./privacy/shield');
 const { WorkspaceManager } = require('./workspaces/workspace_manager');
+const { AIResearchAssistant } = require('./ai/research_assistant');
+const { RuleEngine } = require('./automation/rule_engine');
+const { LibraryManager } = require('./library/library_manager');
+const { FocusSessionManager } = require('./focus/focus_session');
 
 let mainWindow = null;
 let store = null;
 let shield = null;
 let workspaceManager = null;
+let aiAssistant = null;
+let ruleEngine = null;
+let libraryManager = null;
+let focusManager = null;
 
 // Map of tabId -> WebContentsView
 const tabViews = new Map();
@@ -25,6 +33,10 @@ function initializeStoresAndServices() {
   store = new LocalStore('vibez_data');
   shield = new PrivacyShield(store);
   workspaceManager = new WorkspaceManager(store);
+  aiAssistant = new AIResearchAssistant(store);
+  ruleEngine = new RuleEngine(store, workspaceManager);
+  libraryManager = new LibraryManager(store);
+  focusManager = new FocusSessionManager(store);
 
   // Attach privacy shield to default network session
   shield.attachToSession(session.defaultSession);
@@ -90,8 +102,9 @@ function getOrCreateTabView(tab) {
   view.webContents.on('did-finish-load', () => {
     const url = view.webContents.getURL();
     const title = view.webContents.getTitle() || 'New Tab';
-    const canGoBack = view.webContents.canGoBack();
-    const canGoForward = view.webContents.canGoForward();
+    const navHistory = view.webContents.navigationHistory;
+    const canGoBack = navHistory ? navHistory.canGoBack() : view.webContents.canGoBack();
+    const canGoForward = navHistory ? navHistory.canGoForward() : view.webContents.canGoForward();
 
     workspaceManager.updateTab(tab.id, {
       url,
@@ -101,7 +114,24 @@ function getOrCreateTabView(tab) {
       canGoForward
     });
 
-    // Notify shield stats
+    // V2 Automations: Check domain routing rules
+    const activeWs = workspaceManager.getActiveWorkspace();
+    const routeAction = ruleEngine.evaluateNavigation(url, tab.id, activeWs.id);
+    if (routeAction && routeAction.targetWorkspaceId) {
+      // Move tab to target workspace
+      const currentTab = workspaceManager.getActiveTab();
+      if (currentTab && currentTab.id === tab.id) {
+        workspaceManager.setActiveWorkspace(routeAction.targetWorkspaceId);
+        renderActiveWorkspaceTabs();
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send('automation-triggered', {
+            message: `Automated: Tab routed to ${routeAction.targetWorkspaceId} workspace`
+          });
+        }
+      }
+    }
+
+    // Shield statistics update
     try {
       const host = new URL(url).hostname;
       const blocked = shield.getBlockedCount(host);
@@ -224,6 +254,7 @@ function syncStateToRenderer() {
     activeTab,
     splitTab,
     splitRatio,
+    focusStatus: focusManager.getStatus(),
     shieldInfo: {
       domain: activeDomain,
       blocked: shield.getBlockedCount(activeDomain),
@@ -256,6 +287,11 @@ function setupIpcHandlers() {
       }
     }
 
+    // V2 Focus Blocker check
+    if (focusManager.isDistraction(targetUrl)) {
+      targetUrl = `https://duckduckgo.com/?q=focus+session+active`;
+    }
+
     const view = getOrCreateTabView(targetTab);
     view.webContents.loadURL(targetUrl);
     workspaceManager.updateTab(targetTab.id, { url: targetUrl });
@@ -266,7 +302,11 @@ function setupIpcHandlers() {
     const tab = isSplit ? workspaceManager.getSplitTab() : workspaceManager.getActiveTab();
     if (tab && tabViews.has(tab.id)) {
       const wc = tabViews.get(tab.id).webContents;
-      if (wc.canGoBack()) wc.goBack();
+      if (wc.navigationHistory && wc.navigationHistory.canGoBack()) {
+        wc.navigationHistory.goBack();
+      } else if (wc.canGoBack && wc.canGoBack()) {
+        wc.goBack();
+      }
     }
   });
 
@@ -274,7 +314,11 @@ function setupIpcHandlers() {
     const tab = isSplit ? workspaceManager.getSplitTab() : workspaceManager.getActiveTab();
     if (tab && tabViews.has(tab.id)) {
       const wc = tabViews.get(tab.id).webContents;
-      if (wc.canGoForward()) wc.goForward();
+      if (wc.navigationHistory && wc.navigationHistory.canGoForward()) {
+        wc.navigationHistory.goForward();
+      } else if (wc.canGoForward && wc.canGoForward()) {
+        wc.goForward();
+      }
     }
   });
 
@@ -371,7 +415,7 @@ function setupIpcHandlers() {
   // Developer Tools
   ipcMain.on('open-devtools', () => {
     const activeTab = workspaceManager.getActiveTab();
-    if (tabViews.has(activeTab.id)) {
+    if (activeTab && tabViews.has(activeTab.id)) {
       tabViews.get(activeTab.id).webContents.openDevTools({ mode: 'detach' });
     }
   });
@@ -396,9 +440,23 @@ function setupIpcHandlers() {
       }
     }
 
-    // 2. Built-in Commands
+    // 2. Search Smart Library
+    const libMatches = libraryManager.search(q);
+    for (const item of libMatches.slice(0, 5)) {
+      results.push({
+        type: 'library',
+        title: `📚 ${item.title}`,
+        subtitle: item.excerpt ? item.excerpt.slice(0, 80) : item.url,
+        url: item.url
+      });
+    }
+
+    // 3. Built-in Commands
     const commands = [
       { id: 'cmd_new_tab', title: 'New Tab', subtitle: 'Open a new browsing tab' },
+      { id: 'cmd_ai_research', title: 'Open AI Research Assistant', subtitle: 'Summarize or ask questions on current page' },
+      { id: 'cmd_focus_mode', title: 'Start Focus Session (25 min)', subtitle: 'Block distractions and focus' },
+      { id: 'cmd_library', title: 'Open Smart Library', subtitle: 'View saved research notes and collections' },
       { id: 'cmd_split_view', title: 'Toggle Split View', subtitle: 'View two tabs side-by-side' },
       { id: 'cmd_swap_split', title: 'Swap Split Panes', subtitle: 'Swap left and right split panes' },
       { id: 'cmd_devtools', title: 'Open Developer Tools', subtitle: 'Inspect active web page' },
@@ -418,6 +476,100 @@ function setupIpcHandlers() {
 
     return results;
   });
+
+  // --------------------------------------------------------------------------
+  // V2 Feature IPC Handlers: AI Research Assistant
+  // --------------------------------------------------------------------------
+  ipcMain.handle('ai-summarize-active-page', async () => {
+    const activeTab = workspaceManager.getActiveTab();
+    if (!activeTab || !tabViews.has(activeTab.id)) {
+      return { summary: 'No active web page to summarize.', keyTakeaways: [] };
+    }
+    const view = tabViews.get(activeTab.id);
+    const extracted = await aiAssistant.extractContent(view.webContents);
+    return aiAssistant.summarize(extracted);
+  });
+
+  ipcMain.handle('ai-ask-question', async (_event, { question }) => {
+    const activeTab = workspaceManager.getActiveTab();
+    if (!activeTab || !tabViews.has(activeTab.id)) {
+      return { answer: 'No active web page loaded.', citations: [] };
+    }
+    const view = tabViews.get(activeTab.id);
+    const extracted = await aiAssistant.extractContent(view.webContents);
+    return aiAssistant.askQuestion(question, extracted);
+  });
+
+  ipcMain.handle('ai-compare-workspace-tabs', async () => {
+    const activeWs = workspaceManager.getActiveWorkspace();
+    const pages = [];
+    for (const tab of activeWs.tabs) {
+      if (tabViews.has(tab.id)) {
+        const view = tabViews.get(tab.id);
+        const extracted = await aiAssistant.extractContent(view.webContents);
+        if (extracted) pages.push(extracted);
+      }
+    }
+    return aiAssistant.comparePages(pages);
+  });
+
+  // --------------------------------------------------------------------------
+  // V2 Feature IPC Handlers: Automations Rule Engine
+  // --------------------------------------------------------------------------
+  ipcMain.handle('rules-get', () => ruleEngine.getRules());
+  ipcMain.handle('rules-add', (_event, { name, pattern, targetWorkspaceId }) => {
+    return ruleEngine.addRule(name, pattern, targetWorkspaceId);
+  });
+  ipcMain.handle('rules-toggle', (_event, { ruleId }) => ruleEngine.toggleRule(ruleId));
+  ipcMain.handle('rules-delete', (_event, { ruleId }) => ruleEngine.deleteRule(ruleId));
+
+  // --------------------------------------------------------------------------
+  // V2 Feature IPC Handlers: Smart Library 2.0
+  // --------------------------------------------------------------------------
+  ipcMain.handle('library-get-items', (_event, { collectionId }) => {
+    return {
+      collections: libraryManager.getCollections(),
+      items: libraryManager.getItems(collectionId)
+    };
+  });
+  ipcMain.handle('library-save-item', (_event, itemData) => {
+    return libraryManager.saveItem(itemData);
+  });
+  ipcMain.handle('library-delete-item', (_event, { itemId }) => {
+    return libraryManager.deleteItem(itemId);
+  });
+  ipcMain.handle('library-search', (_event, { query }) => {
+    return libraryManager.search(query);
+  });
+
+  // --------------------------------------------------------------------------
+  // V2 Feature IPC Handlers: Focus Sessions
+  // --------------------------------------------------------------------------
+  ipcMain.handle('focus-start', (_event, { minutes }) => {
+    return focusManager.startSession(
+      minutes,
+      (status) => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send('focus-update', status);
+        }
+      },
+      () => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send('focus-update', { isActive: false, remainingSeconds: 0 });
+        }
+      }
+    );
+  });
+
+  ipcMain.handle('focus-stop', () => {
+    const status = focusManager.stopSession();
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('focus-update', status);
+    }
+    return status;
+  });
+
+  ipcMain.handle('focus-get-status', () => focusManager.getStatus());
 }
 
 app.whenReady().then(() => {
