@@ -79,7 +79,7 @@ function getOrCreateTabView(tab) {
     }
   });
 
-  view.webContents.loadURL(tab.url || 'https://duckduckgo.com');
+  view.webContents.loadURL(tab.url || 'https://www.google.com');
 
   // Track tab events
   view.webContents.on('did-start-loading', () => {
@@ -252,7 +252,7 @@ function setupIpcHandlers() {
       if (targetUrl.includes('.') && !targetUrl.includes(' ')) {
         targetUrl = 'https://' + targetUrl;
       } else {
-        targetUrl = `https://duckduckgo.com/?q=${encodeURIComponent(targetUrl)}`;
+        targetUrl = `https://www.google.com/search?q=${encodeURIComponent(targetUrl)}`;
       }
     }
 
@@ -294,7 +294,7 @@ function setupIpcHandlers() {
 
   // Tabs
   ipcMain.on('tab-create', (_event, { url }) => {
-    const newTab = workspaceManager.createTab(url || 'https://duckduckgo.com', true);
+    const newTab = workspaceManager.createTab(url || 'https://www.google.com', true);
     getOrCreateTabView(newTab);
     updateViewports();
     syncStateToRenderer();

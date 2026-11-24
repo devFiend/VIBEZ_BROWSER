@@ -31,7 +31,7 @@ flowchart LR
 - [ ] Dynamic Tab Strip: Tab creation, selection, reordering, closing, audio status indicators, and favicon rendering.
 - [ ] Unified Omnibox:
   - Smart URL detection (e.g. `github.com` vs search query).
-  - Search engine resolver (DuckDuckGo, Google, Bing, Brave Search).
+  - Search engine resolver (Google default, plus Bing, DuckDuckGo, Brave Search).
   - Navigation controls: Back, Forward, Reload, Stop, Home.
 - [ ] WebContentsView lifecycle management:
   - Safe tab allocation, viewport resizing, background tab freezing/throttling.

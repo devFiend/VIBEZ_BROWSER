@@ -37,7 +37,7 @@ Your browser should not just take you to the internet. It should help you get th
 ### 3.1 Core Browser Shell
 - **Engine**: Latest Chromium runtime with Blink rendering, V8 JavaScript, and Chromium networking.
 - **Frameless Cyber-Glass Shell**: Custom Windows titlebar with minimize, maximize/restore, close buttons, and integrated tab strip.
-- **Navigation (Omnibox)**: Unified address and search bar supporting instant URL resolution, DuckDuckGo/Google search, history search, and reload/stop controls.
+- **Navigation (Omnibox)**: Unified address and search bar supporting instant URL resolution, Google search (default), history search, and reload/stop controls.
 - **Tab Management**: Create, close, duplicate, pin, reorder, mute/unmute audio, and drag tabs.
 - **Browser Services**:
   - Bookmarks manager with folders and fast search.

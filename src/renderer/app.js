@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   btnNewTab.addEventListener('click', () => {
-    window.vibezApi.createTab('https://duckduckgo.com');
+    window.vibezApi.createTab('https://www.google.com');
   });
 
   // --------------------------------------------------------------------------

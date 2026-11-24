@@ -35,8 +35,8 @@ class WorkspaceManager {
           tabs: [
             {
               id: 'tab_home_1',
-              url: 'https://duckduckgo.com',
-              title: 'DuckDuckGo — Privacy, simplified.',
+              url: 'https://www.google.com',
+              title: 'Google',
               favicon: '',
               isLoading: false,
               canGoBack: false,
@@ -149,7 +149,7 @@ class WorkspaceManager {
       tabs: [
         {
           id: this._generateId('tab'),
-          url: 'https://duckduckgo.com',
+          url: 'https://www.google.com',
           title: 'New Tab',
           favicon: '',
           isLoading: false,
@@ -181,7 +181,7 @@ class WorkspaceManager {
     return ws.tabs.find(t => t.id === ws.splitTabId) || null;
   }
 
-  createTab(url = 'https://duckduckgo.com', activate = true) {
+  createTab(url = 'https://www.google.com', activate = true) {
     const ws = this.getActiveWorkspace();
     const newTab = {
       id: this._generateId('tab'),
@@ -218,7 +218,7 @@ class WorkspaceManager {
     if (ws.tabs.length === 0) {
       ws.tabs.push({
         id: this._generateId('tab'),
-        url: 'https://duckduckgo.com',
+        url: 'https://www.google.com',
         title: 'New Tab',
         favicon: '',
         isLoading: false,
@@ -262,7 +262,7 @@ class WorkspaceManager {
         const nextIndex = (ws.activeTabIndex + 1) % ws.tabs.length;
         ws.splitTabId = ws.tabs[nextIndex].id;
       } else {
-        const newTab = this.createTab('https://duckduckgo.com', false);
+        const newTab = this.createTab('https://www.google.com', false);
         ws.splitTabId = newTab.id;
       }
     }
