@@ -4,181 +4,135 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>New Tab — Vibez</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="newtab.css">
 </head>
 <body>
-  <!-- Ambient gradient mesh -->
-  <div class="ambient-mesh"></div>
-
   <div id="newtab-wrapper">
     <main class="newtab-content">
-      <!-- Brand Mark + Greeting -->
-      <div class="hero-section">
-        <div class="vibez-mark" title="Vibez Browser">
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="vGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#818CF8"/>
-                <stop offset="50%" stop-color="#6366F1"/>
-                <stop offset="100%" stop-color="#4F46E5"/>
-              </linearGradient>
-            </defs>
-            <rect width="48" height="48" rx="14" fill="url(#vGrad)"/>
-            <path d="M15 14L24 34L33 14" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Centered Brand Logo & Tagline -->
+      <div class="brand-hero">
+        <div class="brand-logo" title="Vibez Browser">
+          <svg width="56" height="56" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" rx="12" fill="#2B2A33" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.5"/>
+            <path d="M14 15L24 35L34 15" stroke="#0060DF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19 15L24 26L29 15" stroke="#06D6A0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
-        <h1 class="hero-greeting" id="greeting-text">Good afternoon</h1>
-        <p class="hero-tagline">What would you like to explore?</p>
+        <h1 class="brand-title">Vibez</h1>
+        <p class="brand-tagline">Privacy by default. Built for focus.</p>
       </div>
 
-      <!-- Search Bar -->
-      <div class="search-container">
-        <div class="search-bar">
+      <!-- Central Search Box (Firefox / DuckDuckGo style) -->
+      <div class="search-box-container">
+        <div class="search-box">
           <span class="search-icon" data-icon="search"></span>
           <input
             type="text"
             id="search-input"
-            placeholder="Search Google or type a URL"
+            placeholder="Search Google or enter address"
             autofocus
             autocomplete="off"
             spellcheck="false"
           >
           <div class="search-actions">
-            <button id="btn-camera" class="search-tool-btn" title="Visual Search">
+            <button id="btn-camera" class="search-action-btn" title="Visual Search">
               <span data-icon="camera"></span>
             </button>
-            <button id="btn-mic" class="search-tool-btn" title="Voice Search">
+            <button id="btn-mic" class="search-action-btn" title="Voice Search">
               <span data-icon="mic"></span>
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Privacy Status -->
-      <div class="privacy-status">
-        <span class="privacy-indicator"></span>
-        <span class="privacy-label">Privacy Shield active — trackers blocked, encryption enforced</span>
+      <!-- DuckDuckGo-Style Privacy Shield Card -->
+      <div class="privacy-dashboard-card">
+        <div class="shield-badge-icon" data-icon="shieldCheck"></div>
+        <div class="privacy-card-content">
+          <div class="privacy-card-title">Enhanced Tracking Protection is ON</div>
+          <div class="privacy-card-desc">Known trackers, fingerprinting attempts, and third-party cookies are blocked automatically.</div>
+        </div>
       </div>
 
-      <!-- Quick Links Grid -->
+      <!-- Shortcuts / Top Sites Grid (Firefox Proton style) -->
       <section class="shortcuts-section">
+        <div class="section-title">Shortcuts</div>
         <div class="shortcuts-grid" id="speed-dial-grid">
-          <a class="shortcut-tile" href="https://www.google.com" target="_self">
-            <div class="tile-icon" style="background: #4285F4;">G</div>
-            <span class="tile-name">Google</span>
+          <a class="shortcut-card" href="https://www.google.com" target="_self">
+            <div class="shortcut-icon" style="background: #4285F4;">G</div>
+            <span class="shortcut-label">Google</span>
           </a>
 
-          <a class="shortcut-tile" href="https://www.youtube.com" target="_self">
-            <div class="tile-icon" style="background: #FF0000;">Y</div>
-            <span class="tile-name">YouTube</span>
+          <a class="shortcut-card" href="https://www.youtube.com" target="_self">
+            <div class="shortcut-icon" style="background: #FF0000;">Y</div>
+            <span class="shortcut-label">YouTube</span>
           </a>
 
-          <a class="shortcut-tile" href="https://github.com" target="_self">
-            <div class="tile-icon" style="background: #8B5CF6;">G</div>
-            <span class="tile-name">GitHub</span>
+          <a class="shortcut-card" href="https://github.com" target="_self">
+            <div class="shortcut-icon" style="background: #24292E;">GH</div>
+            <span class="shortcut-label">GitHub</span>
           </a>
 
-          <a class="shortcut-tile" href="https://www.reddit.com" target="_self">
-            <div class="tile-icon" style="background: #FF4500;">R</div>
-            <span class="tile-name">Reddit</span>
+          <a class="shortcut-card" href="https://www.reddit.com" target="_self">
+            <div class="shortcut-icon" style="background: #FF4500;">R</div>
+            <span class="shortcut-label">Reddit</span>
           </a>
 
-          <a class="shortcut-tile" href="https://x.com" target="_self">
-            <div class="tile-icon" style="background: #1D9BF0;">X</div>
-            <span class="tile-name">X</span>
+          <a class="shortcut-card" href="https://duckduckgo.com" target="_self">
+            <div class="shortcut-icon" style="background: #DE5833;">DDG</div>
+            <span class="shortcut-label">DuckDuckGo</span>
           </a>
 
-          <a class="shortcut-tile" href="https://chatgpt.com" target="_self">
-            <div class="tile-icon" style="background: #10A37F;">C</div>
-            <span class="tile-name">ChatGPT</span>
+          <a class="shortcut-card" href="https://en.wikipedia.org" target="_self">
+            <div class="shortcut-icon" style="background: #4B5563;">W</div>
+            <span class="shortcut-label">Wikipedia</span>
           </a>
 
-          <a class="shortcut-tile" href="https://stackoverflow.com" target="_self">
-            <div class="tile-icon" style="background: #F48024;">S</div>
-            <span class="tile-name">Stack Overflow</span>
+          <a class="shortcut-card" href="https://news.ycombinator.com" target="_self">
+            <div class="shortcut-icon" style="background: #FF6600;">HN</div>
+            <span class="shortcut-label">Hacker News</span>
           </a>
 
-          <button id="btn-add-tile" class="shortcut-tile tile-add">
-            <div class="tile-icon tile-icon-add">
+          <button id="btn-add-tile" class="shortcut-card shortcut-add">
+            <div class="shortcut-icon add-icon">
               <span data-icon="plus"></span>
             </div>
-            <span class="tile-name">Add</span>
+            <span class="shortcut-label">Add shortcut</span>
           </button>
         </div>
       </section>
 
-      <!-- Discover Section -->
-      <section class="discover-section">
-        <div class="discover-header">
-          <h2 class="discover-title">Discover</h2>
-          <div class="category-pills" id="category-pills">
-            <button class="category-pill active" data-category="all">All</button>
-            <button class="category-pill" data-category="top">Top Stories</button>
-            <button class="category-pill" data-category="health">Health</button>
-            <button class="category-pill" data-category="entertainment">Entertainment</button>
-            <button class="category-pill" data-category="travel">Travel</button>
-            <button class="category-pill" data-category="sports">Sports</button>
-          </div>
-        </div>
-
-        <div class="discover-grid" id="stories-grid">
-          <article class="discover-card" data-category="entertainment">
-            <div class="card-image">
-              <div class="card-img-fill img-gradient-1"></div>
-              <span class="card-tag">Design</span>
-            </div>
-            <div class="card-body">
-              <span class="card-source">Wired — 2h ago</span>
-              <h3 class="card-title">Fluid Geometry: Inside the New Waves of Generative Architecture</h3>
-            </div>
-          </article>
-
-          <article class="discover-card" data-category="travel">
-            <div class="card-image">
-              <div class="card-img-fill img-gradient-2"></div>
-              <span class="card-tag">Expeditions</span>
-            </div>
-            <div class="card-body">
-              <span class="card-source">Nat Geo — 3h ago</span>
-              <h3 class="card-title">Uncharted Fjords: Navigating the Pristine Waters of Northern Glaciers</h3>
-            </div>
-          </article>
-
-          <article class="discover-card" data-category="sports">
-            <div class="card-image">
-              <div class="card-img-fill img-gradient-3"></div>
-              <span class="card-tag">Motorsport</span>
-            </div>
-            <div class="card-body">
-              <span class="card-source">Speedway — 5h ago</span>
-              <h3 class="card-title">Next-Gen Electric Supercars Tackle the Alpine Mountain Passes</h3>
-            </div>
-          </article>
-        </div>
-      </section>
+      <!-- Footer Info -->
+      <footer class="newtab-footer">
+        <span>Vibez Browser</span>
+        <span class="footer-separator">•</span>
+        <span>Chromium Engine</span>
+        <span class="footer-separator">•</span>
+        <span>Zero-Telemetry</span>
+      </footer>
     </main>
   </div>
 
   <!-- Add Shortcut Modal -->
-  <div id="add-tile-modal" class="modal-overlay" style="display: none;">
-    <div class="modal-panel">
-      <div class="modal-panel-header">
+  <div id="add-tile-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
         <h3>Add Shortcut</h3>
-        <button id="btn-close-tile-modal" class="btn-modal-close" aria-label="Close">
+        <button id="btn-close-tile-modal" class="btn-icon-close" aria-label="Close">
           <span data-icon="close"></span>
         </button>
       </div>
-      <div class="modal-panel-body">
-        <label for="tile-name-input">Name</label>
-        <input type="text" id="tile-name-input" placeholder="e.g. GitHub" maxlength="20">
+      <div class="modal-body">
+        <label for="tile-name-input">Title</label>
+        <input type="text" id="tile-name-input" placeholder="e.g. GitHub" maxlength="24">
 
         <label for="tile-url-input">URL</label>
-        <input type="text" id="tile-url-input" placeholder="https://github.com">
+        <input type="text" id="tile-url-input" placeholder="https://example.com">
 
-        <button id="btn-save-tile" class="btn-accent">Save Shortcut</button>
+        <div class="modal-actions">
+          <button id="btn-cancel-tile" class="btn-secondary">Cancel</button>
+          <button id="btn-save-tile" class="btn-primary">Save</button>
+        </div>
       </div>
     </div>
   </div>

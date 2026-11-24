@@ -1,12 +1,10 @@
 /**
  * Vibez Browser — Renderer UI Controller
- * Manages tabs, workspaces, split view, command center, privacy shield,
- * AI assistant, library, automations, focus sessions.
- * Zero emojis — SVG icons or plain text only.
+ * High-performance, clean architecture matching Mozilla Firefox & DuckDuckGo.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Global State
+  // Global State Cache
   let currentWorkspaces = [];
   let currentActiveWsId = null;
   let currentActiveTab = null;
@@ -16,6 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // DOM Elements
   const workspacesList = document.getElementById('workspaces-list');
+  const btnWorkspaceMenu = document.getElementById('btn-workspace-menu');
+  const workspaceDropdown = document.getElementById('workspace-dropdown');
+  const wsIndicatorDot = document.getElementById('ws-indicator-dot');
+  const wsCurrentName = document.getElementById('ws-current-name');
+
   const tabStrip = document.getElementById('tab-strip');
   const btnNewTab = document.getElementById('btn-new-tab');
   const urlInput = document.getElementById('url-input');
@@ -27,11 +30,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnForward = document.getElementById('btn-forward');
   const btnReload = document.getElementById('btn-reload');
 
+  const btnFire = document.getElementById('btn-fire');
   const btnToggleSplit = document.getElementById('btn-toggle-split');
   const btnSwapSplit = document.getElementById('btn-swap-split');
-  const btnCommandCenter = document.getElementById('btn-command-center');
-  const btnDevtools = document.getElementById('btn-devtools');
-  const btnAddWorkspace = document.getElementById('btn-add-workspace');
+  const btnAiAssistant = document.getElementById('btn-ai-assistant');
+  const btnLibrary = document.getElementById('btn-library');
+  const btnFocus = document.getElementById('btn-focus');
+  const btnBrowserMenu = document.getElementById('btn-browser-menu');
+  const browserMenuDropdown = document.getElementById('browser-menu-dropdown');
 
   const btnShield = document.getElementById('btn-shield');
   const shieldBadge = document.getElementById('shield-count-badge');
@@ -46,13 +52,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const commandResults = document.getElementById('command-results');
 
   const workspaceModal = document.getElementById('workspace-modal');
+  const btnAddWorkspace = document.getElementById('btn-add-workspace');
   const btnCloseWsModal = document.getElementById('btn-close-ws-modal');
   const wsNameInput = document.getElementById('ws-name-input');
   const wsIconInput = document.getElementById('ws-icon-input');
   const btnSubmitCreateWs = document.getElementById('btn-submit-create-ws');
-  let selectedWsColor = '#6366F1';
+  let selectedWsColor = '#0060DF';
 
-  // Populate SVG icons
+  // Populate all SVG icons across the chrome
   function initIcons() {
     if (typeof ICONS !== 'undefined') {
       document.querySelectorAll('[data-icon]').forEach(slot => {
@@ -65,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   initIcons();
 
-  // Window Controls (Windows Fluent only)
+  // Window Controls (Windows Fluent)
   const winMin = document.getElementById('win-min');
   const winMax = document.getElementById('win-max');
   const winClose = document.getElementById('win-close');
@@ -73,15 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (winMax) winMax.addEventListener('click', () => window.vibezApi.maximizeWindow());
   if (winClose) winClose.addEventListener('click', () => window.vibezApi.closeWindow());
 
-  // Settings Gear
-  const btnSettingsGear = document.getElementById('btn-settings-gear');
-  if (btnSettingsGear) {
-    btnSettingsGear.addEventListener('click', () => {
-      commandModal.style.display === 'flex' ? closeCommandCenter() : openCommandCenter();
-    });
-  }
-
-  // Omnibox Buttons
+  // Omnibox Bookmark & Share
   const btnStarBookmark = document.getElementById('btn-star-bookmark');
   if (btnStarBookmark) {
     btnStarBookmark.addEventListener('click', async () => {
@@ -91,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
           title: currentActiveTab.title || 'Bookmarked Page',
           excerpt: `Saved from ${currentActiveTab.url}`
         });
-        showShellToast('Saved to Smart Library');
+        showShellToast('Page bookmarked');
       }
     });
   }
@@ -106,17 +105,63 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Toolbar Actions
-  const btnWallet = document.getElementById('btn-wallet');
-  if (btnWallet) btnWallet.addEventListener('click', () => showShellToast('Vibez Vault: Zero-knowledge active'));
-  const btnRewards = document.getElementById('btn-rewards');
-  if (btnRewards) btnRewards.addEventListener('click', () => showShellToast('Zero-Tracking Rewards active'));
-  const btnAppsGrid = document.getElementById('btn-apps-grid');
-  if (btnAppsGrid) btnAppsGrid.addEventListener('click', () => openCommandCenter());
-  const btnUserProfile = document.getElementById('btn-user-profile');
-  if (btnUserProfile) btnUserProfile.addEventListener('click', () => { workspaceModal.style.display = 'flex'; });
-  const btnMoreOptions = document.getElementById('btn-more-options');
-  if (btnMoreOptions) btnMoreOptions.addEventListener('click', () => openCommandCenter());
+  // DuckDuckGo Fire Button
+  if (btnFire) {
+    btnFire.addEventListener('click', () => {
+      if (currentActiveTab) {
+        window.vibezApi.navigate('vibez://newtab');
+        showShellToast('Burned: Tab session reset');
+      }
+    });
+  }
+
+  // Workspaces Dropdown
+  if (btnWorkspaceMenu && workspaceDropdown) {
+    btnWorkspaceMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+      workspaceDropdown.style.display = workspaceDropdown.style.display === 'flex' ? 'none' : 'flex';
+      if (browserMenuDropdown) browserMenuDropdown.style.display = 'none';
+    });
+  }
+
+  // Application Menu (Hamburger)
+  if (btnBrowserMenu && browserMenuDropdown) {
+    btnBrowserMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+      browserMenuDropdown.style.display = browserMenuDropdown.style.display === 'flex' ? 'none' : 'flex';
+      if (workspaceDropdown) workspaceDropdown.style.display = 'none';
+    });
+  }
+
+  // Close dropdowns on outside click
+  window.addEventListener('click', () => {
+    if (workspaceDropdown) workspaceDropdown.style.display = 'none';
+    if (browserMenuDropdown) browserMenuDropdown.style.display = 'none';
+  });
+
+  // Menu items click events
+  const menuItemNewTab = document.getElementById('menu-new-tab');
+  if (menuItemNewTab) menuItemNewTab.addEventListener('click', () => window.vibezApi.createTab());
+
+  const menuItemSplit = document.getElementById('menu-split');
+  if (menuItemSplit) menuItemSplit.addEventListener('click', () => window.vibezApi.toggleSplitView());
+
+  const menuItemCommand = document.getElementById('menu-command');
+  if (menuItemCommand) menuItemCommand.addEventListener('click', () => openCommandCenter());
+
+  const menuItemAutomations = document.getElementById('menu-automations');
+  if (menuItemAutomations) menuItemAutomations.addEventListener('click', () => openAutomationsModal());
+
+  const menuItemDevtools = document.getElementById('menu-devtools');
+  if (menuItemDevtools) menuItemDevtools.addEventListener('click', () => window.vibezApi.openDevTools());
+
+  const menuItemFire = document.getElementById('menu-fire');
+  if (menuItemFire) {
+    menuItemFire.addEventListener('click', () => {
+      window.vibezApi.navigate('vibez://newtab');
+      showShellToast('Burned: Session data cleared');
+    });
+  }
 
   function showShellToast(msg) {
     const toast = document.getElementById('automation-toast');
@@ -129,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
-  // Reactive State Sync
+  // Reactive State Sync from Main Process
   // --------------------------------------------------------------------------
   window.vibezApi.onStateUpdate((state) => {
     currentWorkspaces = state.workspaces || [];
@@ -157,26 +202,37 @@ document.addEventListener('DOMContentLoaded', () => {
   // Workspace Rendering
   // --------------------------------------------------------------------------
   function renderWorkspaces() {
+    if (!workspacesList) return;
     workspacesList.innerHTML = '';
-    currentWorkspaces.forEach((ws, idx) => {
-      const btn = document.createElement('button');
-      btn.className = `ws-btn ${ws.id === currentActiveWsId ? 'active' : ''}`;
-      btn.title = `${ws.name} (Ctrl+${idx + 1})`;
-      btn.style.setProperty('--ws-color', ws.color);
-      // Use first letter of workspace name instead of emoji
-      const icon = ws.icon || ws.name.charAt(0).toUpperCase() || 'W';
-      btn.textContent = icon.length > 2 ? icon.charAt(0) : icon;
 
-      btn.addEventListener('click', () => {
+    const activeWs = currentWorkspaces.find(w => w.id === currentActiveWsId);
+    if (activeWs && wsCurrentName && wsIndicatorDot) {
+      wsCurrentName.textContent = activeWs.name;
+      wsIndicatorDot.style.backgroundColor = activeWs.color || 'var(--fx-blue)';
+    }
+
+    currentWorkspaces.forEach((ws, idx) => {
+      const item = document.createElement('button');
+      item.className = `fx-dropdown-item ${ws.id === currentActiveWsId ? 'active' : ''}`;
+      item.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="width: 8px; height: 8px; border-radius: 50%; background-color: ${ws.color || 'var(--fx-blue)'};"></span>
+          <span>${ws.name}</span>
+        </div>
+        <span class="menu-accel">Ctrl+${idx + 1}</span>
+      `;
+
+      item.addEventListener('click', () => {
         window.vibezApi.switchWorkspace(ws.id);
+        if (workspaceDropdown) workspaceDropdown.style.display = 'none';
       });
 
-      workspacesList.appendChild(btn);
+      workspacesList.appendChild(item);
     });
   }
 
   // --------------------------------------------------------------------------
-  // Tab Strip Rendering
+  // Tab Strip Rendering (Proton Floating Tabs)
   // --------------------------------------------------------------------------
   function renderTabs() {
     const activeWs = currentWorkspaces.find(w => w.id === currentActiveWsId);
@@ -191,10 +247,8 @@ document.addEventListener('DOMContentLoaded', () => {
       tabEl.className = `tab-item ${isActive ? 'active' : ''} ${isSplit ? 'split-active' : ''}`;
       tabEl.title = tab.title || tab.url;
 
-      const iconSpan = document.createElement('span');
-      iconSpan.className = 'tab-icon-mark';
-      iconSpan.style.cssText = 'display:flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:4px;background:#6366F1;color:#fff;font-size:8px;font-weight:700;flex-shrink:0;';
-      iconSpan.textContent = 'V';
+      const dotSpan = document.createElement('span');
+      dotSpan.className = 'tab-icon-dot';
 
       const titleSpan = document.createElement('span');
       titleSpan.className = 'tab-title';
@@ -208,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.vibezApi.closeTab(tab.id);
       });
 
-      tabEl.appendChild(iconSpan);
+      tabEl.appendChild(dotSpan);
       tabEl.appendChild(titleSpan);
       tabEl.appendChild(closeBtn);
 
@@ -219,11 +273,11 @@ document.addEventListener('DOMContentLoaded', () => {
       tabStrip.appendChild(tabEl);
     });
 
-    // Update Omnibox
+    // Update Omnibox inputs
     if (currentActiveTab && document.activeElement !== urlInput) {
       if (!currentActiveTab.url || currentActiveTab.url === 'vibez://newtab' || currentActiveTab.url.includes('newtab.html')) {
         urlInput.value = '';
-        urlInput.placeholder = 'Search or type a URL';
+        urlInput.placeholder = 'Search Google or enter address';
       } else {
         urlInput.value = currentActiveTab.url;
       }
@@ -284,14 +338,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // --------------------------------------------------------------------------
   function updateSplitViewUI() {
     const isSplit = !!currentSplitTab;
-    btnToggleSplit.style.color = isSplit ? 'var(--accent-blue)' : 'var(--text-secondary)';
+    btnToggleSplit.style.color = isSplit ? 'var(--fx-blue)' : 'var(--fx-text-secondary)';
     btnSwapSplit.style.display = isSplit ? 'flex' : 'none';
     splitUrlContainer.style.display = isSplit ? 'flex' : 'none';
     splitDivider.style.display = isSplit ? 'flex' : 'none';
 
     if (isSplit) {
-      const containerWidth = window.innerWidth - 54;
-      const dividerX = 54 + Math.floor(containerWidth * currentSplitRatio) - 3;
+      const containerWidth = window.innerWidth;
+      const dividerX = Math.floor(containerWidth * currentSplitRatio) - 2;
       splitDivider.style.left = `${dividerX}px`;
     }
   }
@@ -299,6 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
   btnToggleSplit.addEventListener('click', () => window.vibezApi.toggleSplitView());
   btnSwapSplit.addEventListener('click', () => window.vibezApi.swapSplitPanes());
 
+  // Split Divider Dragging
   let isDraggingDivider = false;
   splitDivider.addEventListener('mousedown', () => {
     isDraggingDivider = true;
@@ -307,9 +362,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('mousemove', (e) => {
     if (!isDraggingDivider) return;
-    const containerWidth = window.innerWidth - 54;
-    const offset = e.clientX - 54;
-    const ratio = Math.max(0.2, Math.min(0.8, offset / containerWidth));
+    const containerWidth = window.innerWidth;
+    const ratio = Math.max(0.2, Math.min(0.8, e.clientX / containerWidth));
     window.vibezApi.setSplitRatio(ratio);
   });
 
@@ -325,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --------------------------------------------------------------------------
   function updateShieldUI() {
     shieldBadge.textContent = currentShield.blocked || 0;
-    shieldBadge.style.color = currentShield.enabled ? 'var(--accent-green)' : 'var(--text-muted)';
+    shieldBadge.style.color = currentShield.enabled ? 'var(--fx-green)' : 'var(--fx-text-muted)';
     shieldDomainLabel.textContent = currentShield.domain || 'This website';
     shieldStatBlocked.textContent = currentShield.blocked || 0;
     shieldToggleInput.checked = currentShield.enabled;
@@ -372,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderCommandResults() {
     commandResults.innerHTML = '';
     if (commandResultsCache.length === 0) {
-      commandResults.innerHTML = '<div style="padding: 16px; color: var(--text-muted); font-size: 13px; text-align: center;">No matching tabs or commands</div>';
+      commandResults.innerHTML = '<div style="padding: 16px; color: var(--fx-text-muted); font-size: 13px; text-align: center;">No matching tabs or commands</div>';
       return;
     }
 
@@ -415,9 +469,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  btnCommandCenter.addEventListener('click', openCommandCenter);
-  btnDevtools.addEventListener('click', () => window.vibezApi.openDevTools());
-
   commandSearchInput.addEventListener('input', (e) => {
     executeCommandSearch(e.target.value);
   });
@@ -444,11 +495,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // --------------------------------------------------------------------------
   // Workspace Creation Modal
   // --------------------------------------------------------------------------
-  btnAddWorkspace.addEventListener('click', () => {
-    workspaceModal.style.display = 'flex';
-    wsNameInput.value = '';
-    wsNameInput.focus();
-  });
+  if (btnAddWorkspace) {
+    btnAddWorkspace.addEventListener('click', () => {
+      if (workspaceDropdown) workspaceDropdown.style.display = 'none';
+      workspaceModal.style.display = 'flex';
+      wsNameInput.value = '';
+      wsNameInput.focus();
+    });
+  }
 
   btnCloseWsModal.addEventListener('click', () => {
     workspaceModal.style.display = 'none';
@@ -472,9 +526,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --------------------------------------------------------------------------
-  // V2: AI Research Assistant Drawer
+  // AI Research Assistant Drawer (Duck.ai / Firefox style)
   // --------------------------------------------------------------------------
-  const btnAiAssistant = document.getElementById('btn-ai-assistant');
   const aiDrawer = document.getElementById('ai-drawer');
   const btnCloseAi = document.getElementById('btn-close-ai');
   const btnAiSummarize = document.getElementById('btn-ai-summarize');
@@ -510,7 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <h4>Executive Summary</h4>
         <p>${res.summary}</p>
         ${res.keyTakeaways && res.keyTakeaways.length > 0 ? `
-          <h4 style="margin-top: 12px;">Key Takeaways</h4>
+          <h4 style="margin-top: 10px;">Key Takeaways</h4>
           ${res.keyTakeaways.map(t => `<div class="ai-takeaway-item">${t}</div>`).join('')}
         ` : ''}
         ${res.citations && res.citations.length > 0 ? `
@@ -535,10 +588,10 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="ai-summary-card">
         <h4>Cross-Tab Synthesis (${res.totalSources} Tabs)</h4>
         <p class="muted-text">${res.overview}</p>
-        <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 6px;">
           ${res.sources.map(s => `
-            <div style="background: var(--bg-dark); padding: 8px; border-radius: 6px;">
-              <strong style="color: var(--text-primary); font-size: 11px;">${s.title}</strong>
+            <div style="background: var(--fx-surface); padding: 8px; border-radius: 4px;">
+              <strong style="color: var(--fx-text-primary); font-size: 11px;">${s.title}</strong>
               <div class="muted-text">Focus: ${s.coreFocus} (${s.wordCount} words)</div>
             </div>
           `).join('')}
@@ -553,10 +606,10 @@ document.addEventListener('DOMContentLoaded', () => {
     aiQueryInput.value = '';
 
     aiContentArea.insertAdjacentHTML('beforeend', `
-      <div style="background: rgba(59, 130, 246, 0.1); border-left: 2px solid var(--accent-blue); padding: 8px 12px; border-radius: 4px; font-size: 12px; margin-top: 8px;">
+      <div style="background: rgba(0, 96, 223, 0.15); border-left: 2px solid var(--fx-blue); padding: 8px 10px; border-radius: 4px; font-size: 12px; margin-top: 6px;">
         <strong>Q:</strong> ${q}
       </div>
-      <div id="ai-loading-answer" class="muted-text" style="padding: 6px 12px;">Analyzing text passages...</div>
+      <div id="ai-loading-answer" class="muted-text" style="padding: 4px 10px;">Analyzing text passages...</div>
     `);
     aiContentArea.scrollTop = aiContentArea.scrollHeight;
 
@@ -581,9 +634,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --------------------------------------------------------------------------
-  // V2: Smart Library Drawer
+  // Smart Library Drawer
   // --------------------------------------------------------------------------
-  const btnLibrary = document.getElementById('btn-library');
   const libraryDrawer = document.getElementById('library-drawer');
   const btnCloseLibrary = document.getElementById('btn-close-library');
   const librarySearchInput = document.getElementById('library-search-input');
@@ -624,7 +676,6 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       `;
 
-      // Set delete icon via SVG
       const delSlot = card.querySelector('.del-icon-slot');
       if (delSlot && typeof ICONS !== 'undefined' && ICONS.trash) {
         delSlot.innerHTML = ICONS.trash;
@@ -666,9 +717,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
-  // V2: Automations Rule Engine
+  // Automations Rule Engine
   // --------------------------------------------------------------------------
-  const btnAutomations = document.getElementById('btn-automations');
   const automationsModal = document.getElementById('automations-modal');
   const btnCloseRules = document.getElementById('btn-close-rules');
   const rulesListContainer = document.getElementById('rules-list-container');
@@ -728,7 +778,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  btnAutomations.addEventListener('click', openAutomationsModal);
   btnCloseRules.addEventListener('click', () => { automationsModal.style.display = 'none'; });
 
   btnSaveNewRule.addEventListener('click', async () => {
@@ -751,9 +800,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --------------------------------------------------------------------------
-  // V2: Focus Sessions
+  // Focus Sessions
   // --------------------------------------------------------------------------
-  const btnFocus = document.getElementById('btn-focus');
   const focusModal = document.getElementById('focus-modal');
   const btnCloseFocus = document.getElementById('btn-close-focus');
   const focusPill = document.getElementById('focus-pill');
@@ -848,6 +896,8 @@ document.addEventListener('DOMContentLoaded', () => {
       focusModal.style.display = 'none';
       aiDrawer.style.display = 'none';
       libraryDrawer.style.display = 'none';
+      if (workspaceDropdown) workspaceDropdown.style.display = 'none';
+      if (browserMenuDropdown) browserMenuDropdown.style.display = 'none';
     }
   });
 });
