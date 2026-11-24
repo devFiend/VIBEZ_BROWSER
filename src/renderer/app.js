@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Populate all SVG icons across the shell chrome
   function initIcons() {
     if (typeof ICONS !== 'undefined') {
-      document.querySelectorAll('.btn-svg-slot').forEach(slot => {
+      document.querySelectorAll('[data-icon]').forEach(slot => {
         const iconName = slot.dataset.icon;
         if (ICONS[iconName]) {
           slot.innerHTML = ICONS[iconName];
@@ -63,8 +63,93 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   initIcons();
-  document.getElementById('win-max').addEventListener('click', () => window.vibezApi.maximizeWindow());
-  document.getElementById('win-close').addEventListener('click', () => window.vibezApi.closeWindow());
+
+  // Window Controls (Windows Fluent + Traffic Lights)
+  const winMin = document.getElementById('win-min');
+  const winMax = document.getElementById('win-max');
+  const winClose = document.getElementById('win-close');
+  if (winMax) winMax.addEventListener('click', () => window.vibezApi.maximizeWindow());
+  if (winClose) winClose.addEventListener('click', () => window.vibezApi.closeWindow());
+
+  const trafficClose = document.getElementById('traffic-close');
+  const trafficMin = document.getElementById('traffic-min');
+  const trafficMax = document.getElementById('traffic-max');
+  if (trafficClose) trafficClose.addEventListener('click', () => window.vibezApi.closeWindow());
+  if (trafficMin && winMin) trafficMin.addEventListener('click', () => {});
+  if (trafficMax) trafficMax.addEventListener('click', () => window.vibezApi.maximizeWindow());
+
+  // Dock App Shortcuts (Gmail, Instagram, Discord, Telegram, Facebook, LinkedIn)
+  const appUrls = {
+    gmail: 'https://mail.google.com',
+    instagram: 'https://www.instagram.com',
+    discord: 'https://discord.com/app',
+    telegram: 'https://web.telegram.org',
+    facebook: 'https://www.facebook.com',
+    linkedin: 'https://www.linkedin.com'
+  };
+  document.querySelectorAll('.dock-app-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const appKey = btn.dataset.app;
+      if (appUrls[appKey]) {
+        window.vibezApi.createTab(appUrls[appKey]);
+      }
+    });
+  });
+
+  // Bottom Settings Gear Button
+  const btnSettingsGear = document.getElementById('btn-settings-gear');
+  if (btnSettingsGear) {
+    btnSettingsGear.addEventListener('click', () => {
+      commandModal.style.display === 'flex' ? closeCommandCenter() : openCommandCenter();
+    });
+  }
+
+  // Inner Omnibox Bookmark & Share
+  const btnStarBookmark = document.getElementById('btn-star-bookmark');
+  if (btnStarBookmark) {
+    btnStarBookmark.addEventListener('click', async () => {
+      if (currentActiveTab && currentActiveTab.url) {
+        await window.vibezApi.saveLibraryExcerpt({
+          url: currentActiveTab.url,
+          title: currentActiveTab.title || 'Bookmarked Page',
+          excerpt: `Saved from ${currentActiveTab.url}`
+        });
+        showShellToast('⭐ Saved to Smart Library');
+      }
+    });
+  }
+
+  const btnSharePage = document.getElementById('btn-share-page');
+  if (btnSharePage) {
+    btnSharePage.addEventListener('click', () => {
+      if (currentActiveTab && currentActiveTab.url) {
+        navigator.clipboard?.writeText(currentActiveTab.url);
+        showShellToast('📋 URL copied to clipboard');
+      }
+    });
+  }
+
+  // Toolbar Actions (Wallet, Rewards, Apps, Profile, More)
+  const btnWallet = document.getElementById('btn-wallet');
+  if (btnWallet) btnWallet.addEventListener('click', () => showShellToast('💳 Vibez Vault: Zero-knowledge active'));
+  const btnRewards = document.getElementById('btn-rewards');
+  if (btnRewards) btnRewards.addEventListener('click', () => showShellToast('🎁 Zero-Tracking Rewards active'));
+  const btnAppsGrid = document.getElementById('btn-apps-grid');
+  if (btnAppsGrid) btnAppsGrid.addEventListener('click', () => openCommandCenter());
+  const btnUserProfile = document.getElementById('btn-user-profile');
+  if (btnUserProfile) btnUserProfile.addEventListener('click', () => { workspaceModal.style.display = 'flex'; });
+  const btnMoreOptions = document.getElementById('btn-more-options');
+  if (btnMoreOptions) btnMoreOptions.addEventListener('click', () => openCommandCenter());
+
+  function showShellToast(msg) {
+    const toast = document.getElementById('automation-toast');
+    const toastText = document.getElementById('automation-toast-text');
+    if (toast && toastText) {
+      toastText.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+  }
 
   // --------------------------------------------------------------------------
   // Reactive State Sync from Main Process
@@ -127,6 +212,12 @@ document.addEventListener('DOMContentLoaded', () => {
       tabEl.className = `tab-item ${isActive ? 'active' : ''} ${isSplit ? 'split-active' : ''}`;
       tabEl.title = tab.title || tab.url;
 
+      const iconSpan = document.createElement('span');
+      iconSpan.className = 'tab-icon-orb';
+      iconSpan.style.display = 'flex';
+      iconSpan.style.alignItems = 'center';
+      iconSpan.innerHTML = `<svg width="14" height="14" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="44" fill="#EB5757"/><path d="M24 55 C28 42, 68 40, 76 54 C72 63, 30 67, 24 55 Z" fill="#FFFFFF"/></svg>`;
+
       const titleSpan = document.createElement('span');
       titleSpan.className = 'tab-title';
       titleSpan.textContent = tab.isLoading ? 'Loading...' : (tab.title || 'New Tab');
@@ -139,6 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.vibezApi.closeTab(tab.id);
       });
 
+      tabEl.appendChild(iconSpan);
       tabEl.appendChild(titleSpan);
       tabEl.appendChild(closeBtn);
 
@@ -153,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (currentActiveTab && document.activeElement !== urlInput) {
       if (!currentActiveTab.url || currentActiveTab.url === 'vibez://newtab' || currentActiveTab.url.includes('newtab.html')) {
         urlInput.value = '';
-        urlInput.placeholder = 'Search with Google or enter web address...';
+        urlInput.placeholder = 'Search or type a URL';
       } else {
         urlInput.value = currentActiveTab.url;
       }

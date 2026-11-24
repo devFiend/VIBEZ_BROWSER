@@ -6,111 +6,233 @@
   <title>New Tab — Vibez</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="newtab.css">
 </head>
 <body>
-  <!-- Ambient Aurora Glow Orbs -->
-  <div class="aurora-orb orb-1"></div>
-  <div class="aurora-orb orb-2"></div>
+  <!-- Ambient subtle slate glow -->
+  <div class="ambient-glow glow-center"></div>
 
-  <div id="newtab-container">
-    <!-- Top Meta Row -->
-    <header class="home-header">
-      <div class="brand-tag">
-        <span class="brand-icon">⚡</span>
-        <span class="brand-name">VIBEZ BROWSER</span>
-        <span class="version-badge">V2.0</span>
+  <div id="newtab-wrapper">
+    <main class="newtab-content">
+      <!-- 3D Brand Emblem -->
+      <div class="hero-emblem-container" title="Vibez Browser">
+        <div class="hero-emblem-orb">
+          <svg width="76" height="76" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="sphereGrad" cx="35%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#FF6B6B"/>
+                <stop offset="30%" stop-color="#EB5757"/>
+                <stop offset="75%" stop-color="#C52828"/>
+                <stop offset="100%" stop-color="#801818"/>
+              </radialGradient>
+              <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FFFFFF"/>
+                <stop offset="65%" stop-color="#F1F5F9"/>
+                <stop offset="100%" stop-color="#CBD5E1"/>
+              </linearGradient>
+              <filter id="orbGlow" x="-25%" y="-15%" width="150%" height="160%">
+                <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#EB5757" flood-opacity="0.32"/>
+                <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#000000" flood-opacity="0.45"/>
+              </filter>
+            </defs>
+            <!-- 3D Sphere Body -->
+            <circle cx="50" cy="50" r="42" fill="url(#sphereGrad)" filter="url(#orbGlow)"/>
+            <!-- Glossy Swirling Band -->
+            <path d="M22 56 C28 41, 68 39, 78 54 C74 65, 30 69, 22 56 Z" fill="url(#ringGrad)"/>
+            <ellipse cx="49" cy="53" rx="14" ry="7" fill="#EB5757"/>
+            <!-- Specular Highlight -->
+            <ellipse cx="38" cy="24" rx="12" ry="5" fill="#FFFFFF" opacity="0.4" transform="rotate(-18 38 24)"/>
+          </svg>
+        </div>
       </div>
-      <div id="shield-pill-widget" class="shield-pill">
-        <span class="shield-dot"></span>
-        <span>Privacy Shield Active • Zero Telemetry</span>
-      </div>
-    </header>
 
-    <!-- Center Hero Section -->
-    <main class="home-main">
-      <!-- Time & Greeting -->
-      <div class="time-greeting-section">
-        <h1 id="clock-display" class="clock-text">12:00</h1>
-        <p id="date-display" class="date-text">Tuesday, November 24</p>
-        <p id="greeting-display" class="greeting-text">Good afternoon, devFiend</p>
+      <!-- Trust Badges Row -->
+      <div class="trust-badges-row">
+        <div class="trust-badge">
+          <span class="trust-icon" data-icon="eye"></span>
+          <span class="trust-text">Confidential Search</span>
+        </div>
+        <div class="trust-badge">
+          <span class="trust-icon" data-icon="shieldCheck"></span>
+          <span class="trust-text">Tracker Blocking</span>
+        </div>
+        <div class="trust-badge">
+          <span class="trust-icon" data-icon="lock"></span>
+          <span class="trust-text">Web site encryption</span>
+        </div>
       </div>
 
-      <!-- Floating Central Search Bar -->
-      <div class="central-search-card">
-        <span class="search-engine-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/></svg>
-        </span>
-        <input type="text" id="home-search-input" placeholder="Search Google or enter a web address..." autofocus autocomplete="off" spellcheck="false">
-        <span class="search-hint-badge">Press Enter ↵</span>
+      <!-- Central Search Capsule -->
+      <div class="search-capsule-container">
+        <div class="search-capsule">
+          <span class="capsule-icon-search" data-icon="search"></span>
+          <input 
+            type="text" 
+            id="search-input" 
+            placeholder="What are you looking for today?" 
+            autofocus 
+            autocomplete="off" 
+            spellcheck="false"
+          >
+          <div class="capsule-actions">
+            <button id="btn-camera" class="capsule-tool-btn" title="Visual Search by Image">
+              <span class="capsule-icon" data-icon="camera"></span>
+            </button>
+            <button id="btn-mic" class="capsule-tool-btn" title="Voice Search">
+              <span class="capsule-icon" data-icon="mic"></span>
+            </button>
+            <button id="btn-search-action" class="capsule-submit-btn">
+              “Ho-ho-ho” Search
+            </button>
+          </div>
+        </div>
       </div>
 
-      <!-- Speed Dial Shortcuts Grid -->
-      <section class="shortcuts-section">
-        <div class="shortcuts-grid">
-          <a class="shortcut-card" href="https://www.google.com">
-            <div class="shortcut-icon-circle" style="background: rgba(66, 133, 244, 0.15); color: #4285F4;">G</div>
-            <span class="shortcut-title">Google</span>
+      <!-- Speed Dial 2x4 Grid -->
+      <section class="speed-dial-section">
+        <div class="speed-dial-grid" id="speed-dial-grid">
+          <!-- Card 1: Behance -->
+          <a class="dial-card" href="https://www.behance.net" target="_self">
+            <div class="dial-icon-circle brand-behance" data-icon="behance"></div>
+            <span class="dial-label">Behance | LEDO</span>
           </a>
-          <a class="shortcut-card" href="https://github.com">
-            <div class="shortcut-icon-circle" style="background: rgba(255, 255, 255, 0.1); color: #fff;">GH</div>
-            <span class="shortcut-title">GitHub</span>
+
+          <!-- Card 2: Dribbble -->
+          <a class="dial-card" href="https://dribbble.com" target="_self">
+            <div class="dial-icon-circle brand-dribbble" data-icon="dribbble"></div>
+            <span class="dial-label">Dribbble | LEDO</span>
           </a>
-          <a class="shortcut-card" href="https://www.youtube.com">
-            <div class="shortcut-icon-circle" style="background: rgba(239, 68, 68, 0.15); color: #EF4444;">YT</div>
-            <span class="shortcut-title">YouTube</span>
+
+          <!-- Card 3: Figma -->
+          <a class="dial-card" href="https://www.figma.com" target="_self">
+            <div class="dial-icon-circle brand-figma" data-icon="figma"></div>
+            <span class="dial-label">Figma | LEDO</span>
           </a>
-          <a class="shortcut-card" href="https://reddit.com">
-            <div class="shortcut-icon-circle" style="background: rgba(249, 115, 22, 0.15); color: #F97316;">RD</div>
-            <span class="shortcut-title">Reddit</span>
+
+          <!-- Card 4: Instagram -->
+          <a class="dial-card" href="https://www.instagram.com" target="_self">
+            <div class="dial-icon-circle brand-instagram" data-icon="instagram"></div>
+            <span class="dial-label">Instagram</span>
           </a>
-          <a class="shortcut-card" href="https://chatgpt.com">
-            <div class="shortcut-icon-circle" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">AI</div>
-            <span class="shortcut-title">ChatGPT</span>
+
+          <!-- Card 5: Pinterest -->
+          <a class="dial-card" href="https://www.pinterest.com" target="_self">
+            <div class="dial-icon-circle brand-pinterest" data-icon="pinterest"></div>
+            <span class="dial-label">Pinterest</span>
           </a>
-          <a class="shortcut-card" href="https://en.wikipedia.org">
-            <div class="shortcut-icon-circle" style="background: rgba(168, 85, 247, 0.15); color: #A855F7;">W</div>
-            <span class="shortcut-title">Wikipedia</span>
+
+          <!-- Card 6: Snapchat -->
+          <a class="dial-card" href="https://www.snapchat.com" target="_self">
+            <div class="dial-icon-circle brand-snapchat" data-icon="snapchat"></div>
+            <span class="dial-label">Snapchat</span>
           </a>
-          <a class="shortcut-card" href="https://news.ycombinator.com">
-            <div class="shortcut-icon-circle" style="background: rgba(245, 158, 11, 0.15); color: #F59E0B;">Y</div>
-            <span class="shortcut-title">Hacker News</span>
+
+          <!-- Card 7: TikTok -->
+          <a class="dial-card" href="https://www.tiktok.com" target="_self">
+            <div class="dial-icon-circle brand-tiktok" data-icon="tiktok"></div>
+            <span class="dial-label">TikTok</span>
           </a>
-          <button id="btn-add-shortcut" class="shortcut-card add-card">
-            <div class="shortcut-icon-circle add-circle">+</div>
-            <span class="shortcut-title">Add Tile</span>
+
+          <!-- Card 8: Add Tile -->
+          <button id="btn-add-tile" class="dial-card dial-card-add">
+            <div class="dial-icon-circle add-circle">
+              <span data-icon="plus"></span>
+            </div>
+            <span class="dial-label">Add</span>
           </button>
         </div>
       </section>
 
-      <!-- Bottom Productivity & Stats Deck -->
-      <section class="stats-deck">
-        <div class="deck-card">
-          <div class="deck-icon">🛡️</div>
-          <div class="deck-info">
-            <h4 id="stat-shield-trackers">1,480+</h4>
-            <p>Trackers Neutralized</p>
-          </div>
+      <!-- Top Stories Section -->
+      <section class="top-stories-section">
+        <h2 class="stories-heading">Top Stories</h2>
+
+        <!-- Category Filter Pills Bar -->
+        <div class="category-pills-bar" id="category-pills">
+          <button class="category-pill active" data-category="all">All</button>
+          <button class="category-pill" data-category="top">📰 Top Stories</button>
+          <button class="category-pill" data-category="health">🏥 Health</button>
+          <button class="category-pill" data-category="weather">🌤️ Weather</button>
+          <button class="category-pill" data-category="dining">🍽️ Dining</button>
+          <button class="category-pill" data-category="entertainment">🎬 Entertainment</button>
+          <button class="category-pill" data-category="travel">✈️ Travel</button>
+          <button class="category-pill" data-category="sports">🎾 Sports</button>
         </div>
-        <div class="deck-card">
-          <div class="deck-icon">⚡</div>
-          <div class="deck-info">
-            <h4>4 Workspaces</h4>
-            <p>Dev • Research • Work • Personal</p>
-          </div>
-        </div>
-        <div class="deck-card">
-          <div class="deck-icon">🔒</div>
-          <div class="deck-info">
-            <h4>100% Local</h4>
-            <p>Zero Cloud Telemetry</p>
-          </div>
+
+        <!-- Curated Article Feed Cards -->
+        <div class="stories-grid" id="stories-grid">
+          <!-- Card 1 -->
+          <article class="story-card" data-category="entertainment">
+            <div class="story-image-wrap">
+              <div class="story-img-placeholder img-pink-swirl"></div>
+              <span class="story-badge">Art & Design</span>
+            </div>
+            <div class="story-body">
+              <span class="story-meta">Vogue Culture • 2h ago</span>
+              <h3 class="story-title">Fluid Geometry: Inside the New Waves of Generative Architecture</h3>
+            </div>
+          </article>
+
+          <!-- Card 2 -->
+          <article class="story-card" data-category="travel">
+            <div class="story-image-wrap">
+              <div class="story-img-placeholder img-lake-mountains"></div>
+              <span class="story-badge">Expeditions</span>
+            </div>
+            <div class="story-body">
+              <span class="story-meta">National Geographic • 3h ago</span>
+              <h3 class="story-title">Uncharted Fjords: Navigating the Pristine Waters of Northern Glaciers</h3>
+            </div>
+          </article>
+
+          <!-- Card 3 -->
+          <article class="story-card" data-category="sports">
+            <div class="story-image-wrap">
+              <div class="story-img-placeholder img-car-track"></div>
+              <span class="story-badge">Motorsport</span>
+            </div>
+            <div class="story-body">
+              <span class="story-meta">Speedway Chronicle • 5h ago</span>
+              <h3 class="story-title">Next-Generation Electric Supercars Tackle the Alpine Mountain Passes</h3>
+            </div>
+          </article>
         </div>
       </section>
     </main>
+
+    <!-- Floating Bottom-Right Corner Action Buttons -->
+    <aside class="floating-corner-actions">
+      <button class="corner-floating-btn" id="btn-floating-chat" title="AI Chat & Assistant">
+        <span class="btn-svg-slot" data-icon="chatBubble"></span>
+        <span class="floating-badge-dot"></span>
+      </button>
+      <button class="corner-floating-btn" id="btn-floating-community" title="Vibez Community Hub">
+        <span class="btn-svg-slot" data-icon="usersGroup"></span>
+      </button>
+    </aside>
   </div>
 
+  <!-- Add Custom Tile Modal -->
+  <div id="add-tile-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Add Shortcut Tile</h3>
+        <button id="btn-close-tile-modal" class="btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <label for="tile-name-input">Site Name</label>
+        <input type="text" id="tile-name-input" placeholder="e.g. GitHub" maxlength="20">
+        
+        <label for="tile-url-input">URL Address</label>
+        <input type="text" id="tile-url-input" placeholder="https://github.com">
+
+        <button id="btn-save-tile" class="btn-primary">Save Shortcut</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../icons.js"></script>
   <script src="newtab.js"></script>
 </body>
 </html>

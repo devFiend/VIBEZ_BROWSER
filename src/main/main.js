@@ -60,7 +60,7 @@ function createMainWindow() {
     minHeight: 600,
     frame: false, // Frameless custom chrome
     titleBarStyle: 'hidden',
-    backgroundColor: '#0E1218',
+    backgroundColor: '#161822',
     webPreferences: {
       preload: path.join(__dirname, '../preload/preload.js'),
       contextIsolation: true,
